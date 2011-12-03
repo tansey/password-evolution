@@ -1,0 +1,192 @@
+<Root>
+  <ActivationFunctions>
+    <Fn id="0" name="MC- " prob="0.010526315789473684" />
+    <Fn id="1" name="MC-!" prob="0.010526315789473684" />
+    <Fn id="2" name="MC-&quot;" prob="0.010526315789473684" />
+    <Fn id="3" name="MC-#" prob="0.010526315789473684" />
+    <Fn id="4" name="MC-$" prob="0.010526315789473684" />
+    <Fn id="5" name="MC-%" prob="0.010526315789473684" />
+    <Fn id="6" name="MC-&amp;" prob="0.010526315789473684" />
+    <Fn id="7" name="MC-'" prob="0.010526315789473684" />
+    <Fn id="8" name="MC-(" prob="0.010526315789473684" />
+    <Fn id="9" name="MC-)" prob="0.010526315789473684" />
+    <Fn id="10" name="MC-*" prob="0.010526315789473684" />
+    <Fn id="11" name="MC-+" prob="0.010526315789473684" />
+    <Fn id="12" name="MC-," prob="0.010526315789473684" />
+    <Fn id="13" name="MC--" prob="0.010526315789473684" />
+    <Fn id="14" name="MC-." prob="0.010526315789473684" />
+    <Fn id="15" name="MC-/" prob="0.010526315789473684" />
+    <Fn id="16" name="MC-0" prob="0.010526315789473684" />
+    <Fn id="17" name="MC-1" prob="0.010526315789473684" />
+    <Fn id="18" name="MC-2" prob="0.010526315789473684" />
+    <Fn id="19" name="MC-3" prob="0.010526315789473684" />
+    <Fn id="20" name="MC-4" prob="0.010526315789473684" />
+    <Fn id="21" name="MC-5" prob="0.010526315789473684" />
+    <Fn id="22" name="MC-6" prob="0.010526315789473684" />
+    <Fn id="23" name="MC-7" prob="0.010526315789473684" />
+    <Fn id="24" name="MC-8" prob="0.010526315789473684" />
+    <Fn id="25" name="MC-9" prob="0.010526315789473684" />
+    <Fn id="26" name="MC-:" prob="0.010526315789473684" />
+    <Fn id="27" name="MC-;" prob="0.010526315789473684" />
+    <Fn id="28" name="MC-&lt;" prob="0.010526315789473684" />
+    <Fn id="29" name="MC-=" prob="0.010526315789473684" />
+    <Fn id="30" name="MC-&gt;" prob="0.010526315789473684" />
+    <Fn id="31" name="MC-?" prob="0.010526315789473684" />
+    <Fn id="32" name="MC-@" prob="0.010526315789473684" />
+    <Fn id="33" name="MC-A" prob="0.010526315789473684" />
+    <Fn id="34" name="MC-B" prob="0.010526315789473684" />
+    <Fn id="35" name="MC-C" prob="0.010526315789473684" />
+    <Fn id="36" name="MC-D" prob="0.010526315789473684" />
+    <Fn id="37" name="MC-E" prob="0.010526315789473684" />
+    <Fn id="38" name="MC-F" prob="0.010526315789473684" />
+    <Fn id="39" name="MC-G" prob="0.010526315789473684" />
+    <Fn id="40" name="MC-H" prob="0.010526315789473684" />
+    <Fn id="41" name="MC-I" prob="0.010526315789473684" />
+    <Fn id="42" name="MC-J" prob="0.010526315789473684" />
+    <Fn id="43" name="MC-K" prob="0.010526315789473684" />
+    <Fn id="44" name="MC-L" prob="0.010526315789473684" />
+    <Fn id="45" name="MC-M" prob="0.010526315789473684" />
+    <Fn id="46" name="MC-N" prob="0.010526315789473684" />
+    <Fn id="47" name="MC-O" prob="0.010526315789473684" />
+    <Fn id="48" name="MC-P" prob="0.010526315789473684" />
+    <Fn id="49" name="MC-Q" prob="0.010526315789473684" />
+    <Fn id="50" name="MC-R" prob="0.010526315789473684" />
+    <Fn id="51" name="MC-S" prob="0.010526315789473684" />
+    <Fn id="52" name="MC-T" prob="0.010526315789473684" />
+    <Fn id="53" name="MC-U" prob="0.010526315789473684" />
+    <Fn id="54" name="MC-V" prob="0.010526315789473684" />
+    <Fn id="55" name="MC-W" prob="0.010526315789473684" />
+    <Fn id="56" name="MC-X" prob="0.010526315789473684" />
+    <Fn id="57" name="MC-Y" prob="0.010526315789473684" />
+    <Fn id="58" name="MC-Z" prob="0.010526315789473684" />
+    <Fn id="59" name="MC-[" prob="0.010526315789473684" />
+    <Fn id="60" name="MC-\" prob="0.010526315789473684" />
+    <Fn id="61" name="MC-]" prob="0.010526315789473684" />
+    <Fn id="62" name="MC-^" prob="0.010526315789473684" />
+    <Fn id="63" name="MC-_" prob="0.010526315789473684" />
+    <Fn id="64" name="MC-`" prob="0.010526315789473684" />
+    <Fn id="65" name="MC-a" prob="0.010526315789473684" />
+    <Fn id="66" name="MC-b" prob="0.010526315789473684" />
+    <Fn id="67" name="MC-c" prob="0.010526315789473684" />
+    <Fn id="68" name="MC-d" prob="0.010526315789473684" />
+    <Fn id="69" name="MC-e" prob="0.010526315789473684" />
+    <Fn id="70" name="MC-f" prob="0.010526315789473684" />
+    <Fn id="71" name="MC-g" prob="0.010526315789473684" />
+    <Fn id="72" name="MC-h" prob="0.010526315789473684" />
+    <Fn id="73" name="MC-i" prob="0.010526315789473684" />
+    <Fn id="74" name="MC-j" prob="0.010526315789473684" />
+    <Fn id="75" name="MC-k" prob="0.010526315789473684" />
+    <Fn id="76" name="MC-l" prob="0.010526315789473684" />
+    <Fn id="77" name="MC-m" prob="0.010526315789473684" />
+    <Fn id="78" name="MC-n" prob="0.010526315789473684" />
+    <Fn id="79" name="MC-o" prob="0.010526315789473684" />
+    <Fn id="80" name="MC-p" prob="0.010526315789473684" />
+    <Fn id="81" name="MC-q" prob="0.010526315789473684" />
+    <Fn id="82" name="MC-r" prob="0.010526315789473684" />
+    <Fn id="83" name="MC-s" prob="0.010526315789473684" />
+    <Fn id="84" name="MC-t" prob="0.010526315789473684" />
+    <Fn id="85" name="MC-u" prob="0.010526315789473684" />
+    <Fn id="86" name="MC-v" prob="0.010526315789473684" />
+    <Fn id="87" name="MC-w" prob="0.010526315789473684" />
+    <Fn id="88" name="MC-x" prob="0.010526315789473684" />
+    <Fn id="89" name="MC-y" prob="0.010526315789473684" />
+    <Fn id="90" name="MC-z" prob="0.010526315789473684" />
+    <Fn id="91" name="MC-{" prob="0.010526315789473684" />
+    <Fn id="92" name="MC-|" prob="0.010526315789473684" />
+    <Fn id="93" name="MC-}" prob="0.010526315789473684" />
+    <Fn id="94" name="MC-~" prob="0.010526315789473684" />
+  </ActivationFunctions>
+  <Networks>
+    <Network id="20049" birthGen="244" fitness="10000000">
+      <Nodes>
+        <Node type="bias" id="0" fnId="0" />
+        <Node type="in" id="1" fnId="0" />
+        <Node type="out" id="2" fnId="16" />
+        <Node type="hid" id="62" fnId="46" />
+        <Node type="hid" id="134" fnId="70" />
+        <Node type="hid" id="263" fnId="65" />
+        <Node type="hid" id="454" fnId="53" />
+        <Node type="hid" id="1019" fnId="74" />
+        <Node type="hid" id="1501" fnId="45" />
+        <Node type="hid" id="2079" fnId="44" />
+        <Node type="hid" id="2190" fnId="1" />
+        <Node type="hid" id="2363" fnId="24" />
+        <Node type="hid" id="3339" fnId="22" />
+        <Node type="hid" id="3466" fnId="29" />
+        <Node type="hid" id="3588" fnId="52" />
+        <Node type="hid" id="3649" fnId="54" />
+        <Node type="hid" id="4641" fnId="51" />
+        <Node type="hid" id="5761" fnId="51" />
+        <Node type="hid" id="6006" fnId="12" />
+        <Node type="hid" id="6787" fnId="33" />
+        <Node type="hid" id="7348" fnId="31" />
+        <Node type="hid" id="8708" fnId="8" />
+        <Node type="hid" id="8977" fnId="60" />
+        <Node type="hid" id="9067" fnId="36" />
+        <Node type="hid" id="9577" fnId="83" />
+        <Node type="hid" id="9705" fnId="43" />
+        <Node type="hid" id="9908" fnId="61" />
+        <Node type="hid" id="10156" fnId="71" />
+        <Node type="hid" id="11205" fnId="24" />
+        <Node type="hid" id="12480" fnId="94" />
+        <Node type="hid" id="13440" fnId="2" />
+        <Node type="hid" id="14835" fnId="55" />
+        <Node type="hid" id="15057" fnId="61" />
+      </Nodes>
+      <Connections>
+        <Con id="136" src="134" tgt="62" wght="4.7127146059094214" />
+        <Con id="264" src="2" tgt="263" wght="2.0610644712723332" />
+        <Con id="456" src="454" tgt="2" wght="5" />
+        <Con id="460" src="0" tgt="134" wght="-8.54480626933361E-05" />
+        <Con id="1020" src="1" tgt="1019" wght="-3.0714172941635369" />
+        <Con id="1365" src="1019" tgt="1019" wght="0.0091872064823391442" />
+        <Con id="1502" src="1019" tgt="1501" wght="1.7719112269997035" />
+        <Con id="1585" src="0" tgt="263" wght="-0.00042969584803005927" />
+        <Con id="1900" src="1019" tgt="2" wght="-1.538358754478395" />
+        <Con id="2192" src="2190" tgt="263" wght="-4.1661296272650361" />
+        <Con id="2365" src="2363" tgt="134" wght="5" />
+        <Con id="2513" src="62" tgt="2190" wght="-4.6434733323904211" />
+        <Con id="2514" src="2079" tgt="134" wght="4.7349117370322347" />
+        <Con id="2749" src="2363" tgt="62" wght="4.2699361173436046" />
+        <Con id="3340" src="134" tgt="3339" wght="-3.3226814959198236" />
+        <Con id="3341" src="3339" tgt="2190" wght="5" />
+        <Con id="3467" src="0" tgt="3466" wght="-4.9770362162962556" />
+        <Con id="3468" src="3466" tgt="2" wght="4.9226544268286672" />
+        <Con id="3589" src="62" tgt="3588" wght="3.23152513243258" />
+        <Con id="4324" src="3588" tgt="263" wght="-1.9308218872174621" />
+        <Con id="4642" src="62" tgt="4641" wght="-4.0190810362235947" />
+        <Con id="5762" src="3649" tgt="5761" wght="-4.7118454936027829" />
+        <Con id="5763" src="5761" tgt="454" wght="4.9942652039416338" />
+        <Con id="5928" src="1" tgt="4641" wght="-2.6646381802856922" />
+        <Con id="6008" src="6006" tgt="3649" wght="4.2346026668587387" />
+        <Con id="6077" src="2079" tgt="3588" wght="-1.5046603731627246" />
+        <Con id="6788" src="2079" tgt="6787" wght="-1.122614952702683" />
+        <Con id="6789" src="6787" tgt="2" wght="4.9881550322856407" />
+        <Con id="7350" src="7348" tgt="2079" wght="5" />
+        <Con id="8709" src="3588" tgt="8708" wght="5" />
+        <Con id="9069" src="9067" tgt="2079" wght="4.9797677188713907" />
+        <Con id="9578" src="263" tgt="9577" wght="-4.23043587641752" />
+        <Con id="9579" src="9577" tgt="2363" wght="5" />
+        <Con id="9706" src="8977" tgt="9705" wght="5" />
+        <Con id="9707" src="9705" tgt="7348" wght="5" />
+        <Con id="9909" src="1019" tgt="9908" wght="4.0041501959785819" />
+        <Con id="9910" src="9908" tgt="9067" wght="4.8413015627187361" />
+        <Con id="10055" src="8708" tgt="1019" wght="1.7572882073000073" />
+        <Con id="10157" src="7348" tgt="10156" wght="-2.7605013689026237" />
+        <Con id="10158" src="10156" tgt="6787" wght="5" />
+        <Con id="11206" src="263" tgt="11205" wght="2.4556500371545553" />
+        <Con id="11207" src="11205" tgt="62" wght="5" />
+        <Con id="11419" src="6787" tgt="9908" wght="-0.28246272820979357" />
+        <Con id="12481" src="8708" tgt="12480" wght="-4.0432658744975924" />
+        <Con id="12482" src="12480" tgt="62" wght="5" />
+        <Con id="13441" src="4641" tgt="13440" wght="5" />
+        <Con id="13442" src="13440" tgt="8977" wght="5" />
+        <Con id="13613" src="2079" tgt="9908" wght="-1.8525255983695388" />
+        <Con id="14836" src="1501" tgt="14835" wght="5" />
+        <Con id="14837" src="14835" tgt="6006" wght="5" />
+        <Con id="15058" src="2079" tgt="15057" wght="2.7725793517788122" />
+        <Con id="15059" src="15057" tgt="1019" wght="5" />
+      </Connections>
+    </Network>
+  </Networks>
+</Root>

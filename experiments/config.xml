@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <PopulationSize>100</PopulationSize>
+  <SpecieCount>10</SpecieCount>
+  <Activation>
+    <Scheme>CyclicFixedIters</Scheme>
+    <Iters>4</Iters>
+  </Activation>
+  <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+  <ComplexityThreshold>100</ComplexityThreshold>
+  <Description>
+    Evolutionary Password Cracking
+ 
+    Fitness is the number of passwords cracked by the individual.
+  </Description>
+  <Guesses>10000</Guesses>
+  <PasswordFile>..\..\..\experiments\password.lst</PasswordFile>
+</Config>
