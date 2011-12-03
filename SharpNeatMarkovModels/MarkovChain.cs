@@ -37,13 +37,14 @@ namespace SharpNeatMarkovModels
         /// </summary>
         public string Activate()
         {
-            int stateIdx = 0;
+            int stateIdx = 1;
             string s = "";
             for (int i = 0; i < _stepsPerActivation; i++)
             {
                 if (_rouletteWheels[stateIdx].Probabilities.Length == 0)
                     return s;
-                s += _nodes[RouletteWheel.SingleThrow(_rouletteWheels[stateIdx], _random)].State;
+                stateIdx = _nodes[stateIdx].TransitionDestinations[RouletteWheel.SingleThrow(_rouletteWheels[stateIdx], _random)];
+                s += _nodes[stateIdx].State;
             }
 
             return s;

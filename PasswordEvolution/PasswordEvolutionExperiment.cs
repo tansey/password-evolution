@@ -65,7 +65,7 @@ namespace PasswordEvolution
         /// </summary>
         public int OutputCount
         {
-            get { return 1; }
+            get { return 95; }
         }
 
         /// <summary>
@@ -120,17 +120,20 @@ namespace PasswordEvolution
                 string line = reader.ReadLine();
                 while((line = reader.ReadLine()) != null)
                 {
-                    // Add it to the list
-                    _passwords.Add(line, 1000);
+                    if(line.Length == _activationScheme.TimestepsPerActivation)
+                        // Add it to the list
+                        _passwords.Add(line, 1000);
                 }
             }
+
+            Console.WriteLine("Best possible: {0}", _passwords.Values.Count * 1000);
 
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParams.SpecieCount = _specieCount;
             _neatGenomeParams = new NeatGenomeParameters();
-            _neatGenomeParams.FeedforwardOnly = _activationScheme.AcyclicNetwork;
-            _neatGenomeParams.AddNodeMutationProbability = 0.5;
-            _neatGenomeParams.AddConnectionMutationProbability = 0.5;
+            _neatGenomeParams.FeedforwardOnly = false;
+            _neatGenomeParams.AddNodeMutationProbability = 0.03;
+            _neatGenomeParams.AddConnectionMutationProbability = 0.05;
 
             // TODO: Load states from XML config file
             // Generates all the valid states in the MC using all viable ASCII characters
@@ -148,7 +151,7 @@ namespace PasswordEvolution
         public List<NeatGenome> LoadPopulation(XmlReader xr)
         {
             NeatGenomeFactory genomeFactory = (NeatGenomeFactory)CreateGenomeFactory();
-            return NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, genomeFactory);
+            return NeatGenomeXmlIO.ReadCompleteGenomeList(xr, true, genomeFactory);
         }
 
         /// <summary>
@@ -157,7 +160,7 @@ namespace PasswordEvolution
         public void SavePopulation(XmlWriter xw, IList<NeatGenome> genomeList)
         {
             // Writing node IDs is not necessary for NEAT.
-            NeatGenomeXmlIO.WriteComplete(xw, genomeList, false);
+            NeatGenomeXmlIO.WriteComplete(xw, genomeList, true);
         }
 
         /// <summary>
@@ -186,6 +189,28 @@ namespace PasswordEvolution
         public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
         {
             return CreateEvolutionAlgorithm(_populationSize);
+        }
+
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(List<NeatGenome> seeds)
+        {
+            // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
+            IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
+
+            // Create an initial population of randomly generated genomes.
+            List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(_populationSize, 0, seeds);
+
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
+        }
+
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed)
+        {
+            // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
+            IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
+
+            // Create an initial population of randomly generated genomes.
+            List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(_populationSize, 0, seed);
+
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
 
         /// <summary>

@@ -9,3 +9,5 @@ Changed the call to GetActivationFunction to use a dictionary instead of a hardc
 
 ### Recommended changes
 - Utilize generics more, especially regarding nodes and activation functions. Not every kind of node contains an array of doubles for its auxilary state, takes a double as input, and outputs a double.
+
+- Remove the IBlackBox dependencies in INeatExperiment

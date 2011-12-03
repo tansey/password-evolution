@@ -4,7 +4,7 @@
   <SpecieCount>10</SpecieCount>
   <Activation>
     <Scheme>CyclicFixedIters</Scheme>
-    <Iters>4</Iters>
+    <Iters>6</Iters>
   </Activation>
   <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
   <ComplexityThreshold>100</ComplexityThreshold>
@@ -13,6 +13,6 @@
  
     Fitness is the number of passwords cracked by the individual.
   </Description>
-  <Guesses>10000</Guesses>
+  <Guesses>100000</Guesses>
   <PasswordFile>..\..\..\experiments\password.lst</PasswordFile>
 </Config>

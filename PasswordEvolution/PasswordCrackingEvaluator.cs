@@ -52,6 +52,9 @@ namespace PasswordEvolution
                     score += count;
             }
 
+            if (score == _passwords.Values.Count * 1000)
+                optimal = true;
+
             _evalCount++;
 
             return new FitnessInfo(score, score);
