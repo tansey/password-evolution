@@ -18,6 +18,7 @@ namespace PasswordEvolution
         {
             _passwords = passwords;
             _guesses = guessesPerIndividual;
+            FoundPasswords = new HashSet<string>();
         }
 
         public ulong EvaluationCount
@@ -35,6 +36,8 @@ namespace PasswordEvolution
             get { return optimal; }
         }
 
+        public HashSet<string> FoundPasswords { get; set; }
+
         public FitnessInfo Evaluate(MarkovChain phenome)
         {
             double score = 0;
@@ -48,8 +51,11 @@ namespace PasswordEvolution
                 guessed.Add(guess);
 
                 int count;
-                if(_passwords.TryGetValue(guess, out count))
+                if (_passwords.TryGetValue(guess, out count))
+                {
                     score += count;
+                    FoundPasswords.Add(guess);
+                }
             }
 
             if (score == _passwords.Values.Count * 1000)

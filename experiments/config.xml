@@ -14,5 +14,5 @@
     Fitness is the number of passwords cracked by the individual.
   </Description>
   <Guesses>100000</Guesses>
-  <PasswordFile>..\..\..\experiments\password.lst</PasswordFile>
+  <PasswordFile>..\..\..\experiments\rockyou-withcount.txt</PasswordFile>
 </Config>

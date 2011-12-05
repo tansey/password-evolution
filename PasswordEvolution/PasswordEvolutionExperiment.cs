@@ -34,6 +34,7 @@ namespace PasswordEvolution
         int _guesses;
         Dictionary<string, int> _passwords;
         IActivationFunctionLibrary _activationFnLibrary;
+        PasswordCrackingEvaluator _evaluator;
 
         #region Properties
         /// <summary>
@@ -94,6 +95,11 @@ namespace PasswordEvolution
         {
             get { return _neatGenomeParams; }
         }
+
+        public PasswordCrackingEvaluator Evaluator
+        {
+            get { return _evaluator; }
+        }
         #endregion
 
         /// <summary>
@@ -113,20 +119,30 @@ namespace PasswordEvolution
             _guesses = XmlUtils.GetValueAsInt(xmlConfig, "Guesses");
 
             // Load the passwords from file
+            Console.Write("Loading passwords...");
             string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "PasswordFile");
             _passwords = new Dictionary<string, int>();
+            ulong best = 0;
             using (TextReader reader = new StreamReader(pwdfile))
             {
                 string line = reader.ReadLine();
                 while((line = reader.ReadLine()) != null)
                 {
+                    line = line.TrimStart();
+                    string[] tokens = line.Split();
+
+                    string pw = line.Length == 1 ? line : tokens.Skip(1).Concatenate(" ");
+                    int count = line.Length == 1 ? 1000 : int.Parse(tokens[0]);
+                    best += (ulong)count;
+
                     if(line.Length == _activationScheme.TimestepsPerActivation)
                         // Add it to the list
-                        _passwords.Add(line, 1000);
+                        _passwords.Add(line, count);
                 }
             }
 
-            Console.WriteLine("Best possible: {0}", _passwords.Values.Count * 1000);
+            Console.WriteLine("Uniques: {0}", _passwords.Values.Count);
+            Console.WriteLine("Best possible: {0}", best);
 
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParams.SpecieCount = _specieCount;
@@ -244,13 +260,13 @@ namespace PasswordEvolution
             NeatEvolutionAlgorithm<NeatGenome> ea = new NeatEvolutionAlgorithm<NeatGenome>(_eaParams, speciationStrategy, complexityRegulationStrategy);
 
             // Create the MC evaluator
-            PasswordCrackingEvaluator evaluator = new PasswordCrackingEvaluator(_passwords, _guesses);
+            _evaluator = new PasswordCrackingEvaluator(_passwords, _guesses);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder = CreateGenomeDecoder();
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, evaluator, _parallelOptions);
+            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
 
 
             // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes

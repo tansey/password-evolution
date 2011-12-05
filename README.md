@@ -7,7 +7,8 @@ To accomodate Markov chains, I have made some changes to the underlying framewor
 ### NetworkXmlIO
 Changed the call to GetActivationFunction to use a dictionary instead of a hardcoded switch statement. Added an AddActivationFunction method that enables the user to add a new activation function that can leverage the existing IO plumbing without having to modify the core framework.
 
-### Recommended changes
+#### Other recommended changes in the next version of SharpNEAT
 - Utilize generics more, especially regarding nodes and activation functions. Not every kind of node contains an array of doubles for its auxilary state, takes a double as input, and outputs a double.
 
 - Remove the IBlackBox dependencies in INeatExperiment
+
