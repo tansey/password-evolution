@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <PopulationSize>100</PopulationSize>
+  <SpecieCount>10</SpecieCount>
+  <Activation>
+    <Scheme>CyclicRelax</Scheme>
+    <MaxIters>12</MaxIters>
+    <Threshold>0</Threshold>
+  </Activation>
+  <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+  <ComplexityThreshold>100</ComplexityThreshold>
+  <Description>
+    Evolutionary Password Cracking
+ 
+    Fitness is the number of passwords cracked by the individual.
+  </Description>
+  <Guesses>100</Guesses>
+  <PasswordFile>..\..\..\passwords\test_markov.txt</PasswordFile>
+</Config>

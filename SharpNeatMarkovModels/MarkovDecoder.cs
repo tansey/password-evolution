@@ -24,18 +24,18 @@ namespace SharpNeatMarkovModels
         public MarkovChain Decode(NeatGenome genome)
         {
             Debug.Assert(genome.InputNodeCount == 1);
-
+            
             MarkovChainNode[] nodes = new MarkovChainNode[genome.NeuronGeneList.Count];
             List<int>[] dest = new List<int>[nodes.Length];
             List<double>[] probs = new List<double>[nodes.Length];
-            Dictionary<uint, int> geneToNode = new Dictionary<uint,int>(); 
-
+            Dictionary<uint, int> geneToNode = new Dictionary<uint,int>();
+            
             for (int i = 0; i < nodes.Length; i++)
             {
                 nodes[i] = new MarkovChainNode(){ State = getState(genome.NeuronGeneList[i]) };
                 geneToNode[genome.NeuronGeneList[i].Id] = i;
             }
-
+            
             // Do not permit the nodes to go backwards to the non-text generating states
             uint originId = genome.NeuronGeneList[0].Id;
             uint biasId = genome.NeuronGeneList[1].Id;
@@ -45,6 +45,12 @@ namespace SharpNeatMarkovModels
                 dest[i] = new List<int>();
                 probs[i] = new List<double>();
 
+                if (genome.NeuronGeneList[i].NodeType == NodeType.Bias)
+                    continue;
+
+                if (_scheme.RelaxingActivation && genome.NeuronGeneList[i].NodeType == NodeType.Output)
+                    continue;
+                
                 // Find all connections with this node at the start,
                 // filtering out any that may lead to invalid nodes like the
                 // bias or the origin.
@@ -54,7 +60,7 @@ namespace SharpNeatMarkovModels
                                                         );
                 if (conns == null)
                     continue;
-
+                
                 double sum = conns.Sum(c => Math.Abs(c.Weight));
                 foreach (var conn in conns)
                 {
@@ -68,8 +74,11 @@ namespace SharpNeatMarkovModels
                 nodes[i].TransitionDestinations = dest[i].ToArray();
                 nodes[i].TransitionProbabilities = probs[i].ToArray();
             }
-
-            return new MarkovChain(nodes, _scheme.TimestepsPerActivation);
+            
+            if (_scheme.RelaxingActivation)
+                return new MarkovChain(nodes, _scheme.MaxTimesteps);
+            else
+                return new MarkovChain(nodes, _scheme.TimestepsPerActivation);
         }
 
         private string getState(NeuronGene neuronGene)

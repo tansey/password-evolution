@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <PopulationSize>100</PopulationSize>
+  <SpecieCount>10</SpecieCount>
+  <Activation>
+    <Scheme>CyclicFixedIters</Scheme>
+    <MaxIters>12</MaxIters>
+    <Threshold>0</Threshold>
+    <Iters>8</Iters>
+  </Activation>
+  <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
+  <ComplexityThreshold>100</ComplexityThreshold>
+  <Description>
+    Evolutionary Password Cracking
+ 
+    Fitness is the number of passwords cracked by the individual.
+  </Description>
+  <Guesses>100000</Guesses>
+  <ValidationGuesses>10000000</ValidationGuesses>
+  <PasswordFile>..\..\..\passwords\forced_morphed_english.txt</PasswordFile>
+</Config>

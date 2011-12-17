@@ -10,7 +10,7 @@ namespace SharpNeatMarkovModels
     {
         public static IActivationFunctionLibrary CreateLibraryMc(params string[] nodes)
         {
-            List<ActivationFunctionInfo> fnList = new List<ActivationFunctionInfo>(2);
+            List<ActivationFunctionInfo> fnList = new List<ActivationFunctionInfo>(nodes.Length);
             for (int i = 0; i < nodes.Length; i++)
             {
                 var fn = new MarkovActivationFunction(nodes[i]);

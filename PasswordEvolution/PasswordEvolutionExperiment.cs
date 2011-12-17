@@ -35,8 +35,15 @@ namespace PasswordEvolution
         Dictionary<string, int> _passwords;
         IActivationFunctionLibrary _activationFnLibrary;
         PasswordCrackingEvaluator _evaluator;
+        int _outputs;
 
         #region Properties
+        public Dictionary<string, int> Passwords
+        {
+            get { return _passwords; }
+            set { _passwords = value; }
+        }
+
         /// <summary>
         /// Gets the name of the experiment.
         /// </summary>
@@ -66,7 +73,8 @@ namespace PasswordEvolution
         /// </summary>
         public int OutputCount
         {
-            get { return 95; }
+            get { return _outputs; }
+            set { _outputs = value; }
         }
 
         /// <summary>
@@ -100,6 +108,9 @@ namespace PasswordEvolution
         {
             get { return _evaluator; }
         }
+        public int GuessesPerIndividual { get { return _guesses; } set { _guesses = value; } }
+        public int ValidationGuesses { get; set; }
+        public bool Hashed { get; set; }
         #endregion
 
         /// <summary>
@@ -117,32 +128,21 @@ namespace PasswordEvolution
             _parallelOptions = ExperimentUtils.ReadParallelOptions(xmlConfig);
 
             _guesses = XmlUtils.GetValueAsInt(xmlConfig, "Guesses");
+            Hashed = XmlUtils.TryGetValueAsBool(xmlConfig, "Hashed").HasValue ? XmlUtils.GetValueAsBool(xmlConfig, "Hashed") : false;
+            ValidationGuesses = XmlUtils.GetValueAsInt(xmlConfig, "ValidationGuesses");
 
             // Load the passwords from file
             Console.Write("Loading passwords...");
             string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "PasswordFile");
-            _passwords = new Dictionary<string, int>();
-            ulong best = 0;
-            using (TextReader reader = new StreamReader(pwdfile))
+            if (_passwords == null || _passwords.Count == 0)
             {
-                string line = reader.ReadLine();
-                while((line = reader.ReadLine()) != null)
-                {
-                    line = line.TrimStart();
-                    string[] tokens = line.Split();
-
-                    string pw = line.Length == 1 ? line : tokens.Skip(1).Concatenate(" ");
-                    int count = line.Length == 1 ? 1000 : int.Parse(tokens[0]);
-                    best += (ulong)count;
-
-                    if(line.Length == _activationScheme.TimestepsPerActivation)
-                        // Add it to the list
-                        _passwords.Add(line, count);
-                }
+                int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
+                if (pwLength.HasValue)
+                    Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
+                _passwords = LoadPasswords(pwdfile, pwLength);
             }
-
-            Console.WriteLine("Uniques: {0}", _passwords.Values.Count);
-            Console.WriteLine("Best possible: {0}", best);
+            else
+                Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
 
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParams.SpecieCount = _specieCount;
@@ -156,8 +156,61 @@ namespace PasswordEvolution
             var stateList = new List<string>();
             for (uint i = 32; i < 127; i++)
                 stateList.Add(((char)i).ToString());
+            stateList.Add(null);
             _states = stateList.ToArray();
             _activationFnLibrary = MarkovActivationFunctionLibrary.CreateLibraryMc(_states);
+        }
+
+        public static Dictionary<string, int> LoadPasswords(string pwdfile, int? length = null)
+        {
+            var passwords = new Dictionary<string, int>();
+            ulong best = 0;
+            int[] countsHistogram = new int[20];
+            using (TextReader reader = new StreamReader(pwdfile))
+            {
+                string line = null;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    line = line.TrimStart();
+                    if (line == "")
+                        continue;
+                    string[] tokens = line.Split();
+
+                    string pw = tokens.Length == 1 ? line : tokens.Skip(1).Concatenate(" ");
+                    
+                    // Check if something went wrong or the database had a weird token
+                    if (pw.Length == 0)
+                        continue;
+
+                    int count = tokens.Length == 1 ? 1 : int.Parse(tokens[0]);
+
+                    if (!length.HasValue || pw.Length == length.Value)
+                    {
+                        // Add it to the list
+                        try
+                        {
+                            passwords.Add(pw, count);
+                            best += (ulong)count;
+                            if (count < countsHistogram.Length)
+                                countsHistogram[(int)(count - 1)]++;
+                            else
+                                countsHistogram[countsHistogram.Length - 1]++;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine("Uniques: {0}", passwords.Values.Count);
+            Console.WriteLine("Best possible: {0}", best);
+            Console.WriteLine("Contains \"password\"? {0}", passwords.ContainsKey("password"));
+            for (int i = 0; i < countsHistogram.Length; i++)
+                Console.WriteLine("PWs of Count {0}: {1}", i + 1, countsHistogram[i]);
+
+            return passwords;
         }
 
         /// <summary>
@@ -260,7 +313,8 @@ namespace PasswordEvolution
             NeatEvolutionAlgorithm<NeatGenome> ea = new NeatEvolutionAlgorithm<NeatGenome>(_eaParams, speciationStrategy, complexityRegulationStrategy);
 
             // Create the MC evaluator
-            _evaluator = new PasswordCrackingEvaluator(_passwords, _guesses);
+            PasswordCrackingEvaluator.Passwords = _passwords;
+            _evaluator = new PasswordCrackingEvaluator(_guesses, Hashed);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder = CreateGenomeDecoder();

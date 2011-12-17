@@ -45,7 +45,7 @@ namespace SharpNeatMarkovModels
 
         public string FunctionId
         {
-            get { return "MC-" + _state; }
+            get { return "MC-" + (_state == null ? "END" : _state); }
         }
 
         public string FunctionString
