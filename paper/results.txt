@@ -1,0 +1,483 @@
+Stats on Password Databases
+** rockyou **
+Uniques: 14344389
+Accounts: 32603386
+8-character: 2967116
+Distribution of PW redundancy
+PWs of Count 1: 11884630
+PWs of Count 2: 1323615
+PWs of Count 3: 389854
+PWs of Count 4: 183292
+PWs of Count 5: 109267
+PWs of Count 6: 73006
+PWs of Count 7: 52711
+PWs of Count 8: 39968
+PWs of Count 9: 31337
+PWs of Count 10: 25472
+Filtered to 8-character PWs
+PWs of Count 1: 2427056
+PWs of Count 2: 285694
+PWs of Count 3: 85552
+PWs of Count 4: 41476
+PWs of Count 5: 25014
+PWs of Count 6: 16899
+PWs of Count 7: 12492
+PWs of Count 8: 9605
+PWs of Count 9: 7519
+PWs of Count 10: 5941
+PWs of Count 11: 5006
+PWs of Count 12: 4046
+PWs of Count 13: 3466
+PWs of Count 14: 2915
+PWs of Count 15: 2463
+PWs of Count 16: 2229
+PWs of Count 17: 1972
+PWs of Count 18: 1774
+PWs of Count 19: 1561
+PWs of Count >= 20: 24436
+Total Accounts: 32603046
+Total Unique Passwords: 14344388
+- Contain lowercase: 11253410 (78.45%)
+- Contain uppercase: 1336296 (9.32%)
+- Contain number:    9765213 (68.08%)
+- Contain other:     1017795 (7.10%)
+Length distributions:
+1: 45
+2: 339
+3: 2491
+4: 18154
+5: 259639
+6: 1949272
+7: 2507264
+8: 2967116
+9: 2191623
+10: 2014095
+11: 865899
+12: 555088
+13: 364096
+14: 248257
+15: 161032
+16: 118093
+17: 36711
+18: 23221
+19: 15347
+>= 20: 46606
+
+** phpbb **
+Total Accounts: 255421
+Total Unique Passwords: 184389
+- Contain lowercase: 159418 (86.46%)
+- Contain uppercase: 18616 (10.10%)
+- Contain number:    99778 (54.11%)
+- Contain other:     4067 (2.21%)
+Length distributions:
+1: 32
+2: 137
+3: 776
+4: 4598
+5: 8198
+6: 42070
+7: 32731
+8: 55338
+9: 19188
+10: 11896
+11: 4933
+12: 2505
+13: 1018
+14: 515
+15: 232
+16: 125
+17: 36
+18: 27
+19: 9
+>= 20: 25
+
+** myspace-unfiltered **
+Uniques: 37141
+Best possible: 41542
+Contains "password"? False
+PWs of Count 1: 34691
+PWs of Count 2: 1744
+PWs of Count 3: 373
+PWs of Count 4: 134
+PWs of Count 5: 66
+PWs of Count 6: 35
+PWs of Count 7: 27
+PWs of Count 8: 15
+PWs of Count 9: 14
+PWs of Count 10: 6
+PWs of Count 11: 5
+PWs of Count 12: 4
+PWs of Count 13: 3
+PWs of Count 14: 6
+PWs of Count 15: 5
+PWs of Count 16: 2
+PWs of Count 17: 2
+PWs of Count 18: 2
+PWs of Count 19: 0
+PWs of Count 20: 7
+Total Accounts: 41542
+Total Unique Passwords: 37141
+- Contain lowercase: 35540 (95.69%)
+- Contain uppercase: 2519 (6.78%)
+- Contain number:    31462 (84.71%)
+- Contain other:     4174 (11.24%)
+Length distributions:
+1: 23
+2: 17
+3: 41
+4: 176
+5: 278
+6: 5654
+7: 8391
+8: 8492
+9: 6427
+10: 5316
+11: 1136
+12: 454
+13: 211
+14: 118
+15: 74
+16: 65
+17: 31
+18: 29
+19: 22
+>= 20: 186
+
+** myspace-filtered **
+Uniques: 31326
+Best possible: 35099
+Contains "password"? False
+PWs of Count 1: 29231
+PWs of Count 2: 1493
+PWs of Count 3: 312
+PWs of Count 4: 117
+PWs of Count 5: 58
+PWs of Count 6: 31
+PWs of Count 7: 23
+PWs of Count 8: 14
+PWs of Count 9: 12
+PWs of Count 10: 6
+PWs of Count 11: 3
+PWs of Count 12: 4
+PWs of Count 13: 3
+PWs of Count 14: 2
+PWs of Count 15: 5
+PWs of Count 16: 2
+PWs of Count 17: 2
+PWs of Count 18: 2
+PWs of Count 19: 0
+PWs of Count 20: 6
+Total Accounts: 35099
+Total Unique Passwords: 31326
+- Contain lowercase: 30017 (95.82%)
+- Contain uppercase: 2075 (6.62%)
+- Contain number:    31326 (100.00%)
+- Contain other:     1032 (3.29%)
+Length distributions:
+6: 4727
+7: 7229
+8: 7455
+9: 5650
+10: 4651
+11: 977
+12: 340
+13: 149
+14: 67
+15: 36
+16: 22
+17: 7
+18: 4
+19: 5
+20: 7
+
+** faithwriters **
+Uniques: 8347
+Best possible: 9709
+Contains "password"? True
+PWs of Count 1: 7712
+PWs of Count 2: 393
+PWs of Count 3: 110
+PWs of Count 4: 52
+PWs of Count 5: 29
+PWs of Count 6: 12
+PWs of Count 7: 10
+PWs of Count 8: 5
+PWs of Count 9: 8
+PWs of Count 10: 3
+PWs of Count 11: 3
+PWs of Count 12: 1
+PWs of Count 13: 0
+PWs of Count 14: 0
+PWs of Count 15: 2
+PWs of Count 16: 1
+PWs of Count 17: 1
+PWs of Count 18: 2
+PWs of Count 19: 0
+PWs of Count 20: 3
+Total Accounts: 9709
+Total Unique Passwords: 8347
+- Contain lowercase: 7642 (91.55%)
+- Contain uppercase: 830 (9.94%)
+- Contain number:    3719 (44.55%)
+- Contain other:     46 (0.55%)
+Length distributions:
+1: 1
+2: 1
+3: 2
+4: 14
+5: 94
+6: 2481
+7: 1714
+8: 1967
+9: 912
+10: 542
+11: 286
+12: 165
+13: 80
+14: 31
+15: 29
+16: 8
+17: 5
+18: 8
+19: 1
+20: 6
+
+** singles.org **
+Uniques: 12233
+Best possible: 16248
+Contains "password"? True
+PWs of Count 1: 10499
+PWs of Count 2: 1076
+PWs of Count 3: 300
+PWs of Count 4: 143
+PWs of Count 5: 68
+PWs of Count 6: 38
+PWs of Count 7: 20
+PWs of Count 8: 16
+PWs of Count 9: 16
+PWs of Count 10: 14
+PWs of Count 11: 10
+PWs of Count 12: 5
+PWs of Count 13: 2
+PWs of Count 14: 6
+PWs of Count 15: 1
+PWs of Count 16: 4
+PWs of Count 17: 2
+PWs of Count 18: 0
+PWs of Count 19: 1
+PWs of Count 20: 12
+Total Accounts: 16248
+Total Unique Passwords: 12233
+- Contain lowercase: 10831 (88.54%)
+- Contain uppercase: 1204 (9.84%)
+- Contain number:    4662 (38.11%)
+- Contain other:     31 (0.25%)
+Length distributions:
+1: 4
+2: 11
+3: 78
+4: 568
+5: 881
+6: 3541
+7: 2926
+8: 4224
+
+** training **
+Uniques: 354296
+Best possible: 354296
+Contains "password"? True
+PWs of Count 1: 354296
+PWs of Count 2: 0
+PWs of Count 3: 0
+PWs of Count 4: 0
+PWs of Count 5: 0
+PWs of Count 6: 0
+PWs of Count 7: 0
+PWs of Count 8: 0
+PWs of Count 9: 0
+PWs of Count 10: 0
+PWs of Count 11: 0
+PWs of Count 12: 0
+PWs of Count 13: 0
+PWs of Count 14: 0
+PWs of Count 15: 0
+PWs of Count 16: 0
+PWs of Count 17: 0
+PWs of Count 18: 0
+PWs of Count 19: 0
+PWs of Count 20: 0
+Total Accounts: 354296
+Total Unique Passwords: 354296
+- Contain lowercase: 354296 (100.00%)
+- Contain uppercase: 0 (0.00%)
+- Contain number:    35227 (9.94%)
+- Contain other:     6048 (1.71%)
+Length distributions:
+1: 21
+2: 187
+3: 1659
+4: 6163
+5: 14161
+6: 25644
+7: 37373
+8: 47977
+9: 51549
+10: 47513
+11: 38334
+12: 29592
+13: 21394
+14: 14524
+15: 9126
+16: 4437
+17: 2382
+18: 1137
+19: 607
+>= 20: 516
+
+** testing **
+Uniques: 354296
+Best possible: 354296
+Contains "password"? False
+PWs of Count 1: 354296
+PWs of Count 2: 0
+PWs of Count 3: 0
+PWs of Count 4: 0
+PWs of Count 5: 0
+PWs of Count 6: 0
+PWs of Count 7: 0
+PWs of Count 8: 0
+PWs of Count 9: 0
+PWs of Count 10: 0
+PWs of Count 11: 0
+PWs of Count 12: 0
+PWs of Count 13: 0
+PWs of Count 14: 0
+PWs of Count 15: 0
+PWs of Count 16: 0
+PWs of Count 17: 0
+PWs of Count 18: 0
+PWs of Count 19: 0
+PWs of Count 20: 0
+Total Accounts: 354296
+Total Unique Passwords: 354296
+- Contain lowercase: 354296 (100.00%)
+- Contain uppercase: 0 (0.00%)
+- Contain number:    354296 (100.00%)
+- Contain other:     6048 (1.71%)
+Length distributions:
+8: 89193
+9: 48850
+10: 51926
+11: 46912
+12: 37483
+13: 28667
+14: 20527
+15: 13825
+16: 8679
+17: 3998
+18: 2171
+19: 1034
+>= 20: 1031
+
+===================================================
+
+Learning a better model for N-character guesses
+Show that a first-order (2-layer) Markov chain is not great
+
+Experiment 1
+Trained-Tested, Best Gen 0, Total Gen 0 -> Gen 2
+
+8-layers, squeezed (all passwords)
+phpbb-phpbb, 1719, Gen 0: 781 -> Gen 2: 1509
+phpbb-rockyou, 86862, Gen 0: 24860 -> 54531
+rockyou-rockyou, 77673, Gen 0: 46334 -> 89918
+
+8-layers, truncated (8-character only)
+phpbb-phpbb, 1836, Gen 0: 919 -> Gen 2: 1555
+phpbb-rockyou, 96864, Gen 0: 25368 -> Gen 2: 47862
+rockyou-rockyou, 181735, Gen 0: 72864 -> Gen 2: 136644
+
+2-layers, squeezed (all passwords)
+phpbb-phpbb, 423, Gen 0: 392 -> Gen 2: 847
+phpbb-rockyou, 24456, Gen 0: 14437 -> Gen 2: 33560
+rockyou-rockyou, 31813, Gen 0: 25983 -> Gen 2: 56634
+
+2-layers, truncated (8-character only)
+phpbb-phpbb, 302, Gen 0: 378 -> Gen 2: 607
+phpbb-rockyou, 20943, Gen 0: 10486 -> Gen 2: 21341
+rockyou-rockyou, 22979, Gen 0: 27460 -> Gen 2: 63165
+
+Adaptive, exactly 8-characters
+phpbb-phpbb, 1796, Gen 0: 900  Gen 2: 1532
+
+====================================================
+
+Evolving a better model from a similar distribution
+Show that you can learn a distribution if you have a similar one to bootstrap from
+
+Experiment 1 (toy)
+- Train first-order model on morphed English dictionary (10% contain a number, no minimum length)
+- Evolve for 200 generations on forced morphed English dictionary (required to contain at least 1 number, 8-character minimum)
+	- 100 individuals in the population
+	- 200 generations
+	- 100k guesses per individual
+	- 10M guesses per generation
+- Original model on 100M guesses: 492
+- Unique passwords found by generation 10: 1167
+- Unique passwords found by generation 30: 2108
+- Evolved model on 100M guesses: 1200
+
+Experiment 2 (real-world)
+- Train on phpbb
+- Evolve on rockyou
+	- Fixed at 8-character passwords
+	- Other parameters identical to Experiment 1
+- Original model on 100M guesses: Accounts: 458528 Uniques: 94871
+- Evolved model on 100M guesses: Accounts: 403983 Uniques: 73713
+
+Experiment 3 (real-world)
+- Train on phpbb
+- Evolve on myspace-filtered
+	- Removed all passwords not matching rule creation
+		- Must contain a digit
+		- Must be at least 6 letters long
+	- 100 individuals in the population
+	- 200 generations
+	- 1M guesses per individual
+	- 100M guesses per generation
+- Original model on 2B guesses: Accounts: 1680 Uniques: 1403
+- Evolved model on 2B guesses: Accounts: 1215 Uniques: 1021
+
+====================================================
+
+Evolving the last mile
+Focus on long passwords
+
+====================================================
+
+Password model boosting
+- Strip out common passwords
+- Learn a model
+- Strip out the ones the model guessed and learn a new model
+- Repeat
+
+====================================================
+
+Arguments to make
+
+- Modern databases typically hash and salt passwords, effectively defeating rainbow table attacks. This requires the attacker to recompute the ciphertext of every entry in the database for each guess made. Aside from adding more raw computing power, better guessing is the only way to speed up attacks on such databases. Thus, while we are hopeful that the models presented here can be adapted into a form suitable for rainbow table iteration in practice, the models learned are likely to be helpful even if this is not the case.
+
+- Vitaly's work shows that it's possible to leverage a Markov filter when computing rainbow tables, to structure the search space better, thus improving coverage of the database. Hence, an even better Markov filter would be able to cover the search space better.
+
+- Most leaked password databases (rockyou, phpbb, myspace, singles, gawker, etc.) are heavily skewed towards weak passwords, especially true of the largest leaks (rockyou, phpbb, gawker), which all contain no password rule requirements such as adding numbers, capital letters, or special characters. Such policies are now standard practice and are even built into in many web application frameworks such as Ruby on Rails and ASP.NET MVC. Thus, we can assume that a large number of such passwords will either be rejected by a ruleset at creation time or will be trivial to crack via a simple dictionary attack. The most important passwords to model are therefore those that do not fall victim to simple attacks. Existing Markov models, such as the one found in JtR, perform no filtering of common passwords.
+
+- Rule sets employed at creation time, whether known or unknown, also mean that the distribution of passwords may be specific to the database itself. Intuitively, training on a different database (such as the rockyou database that JtR relies on) may even be detrimental to performance under the correct set of creation rules.
+
+- Mainstream rule sets are also constantly evolving. Web standards have moved from no requirements, to including one uppercase and number, to also requiring a special character. In the worst case, one may not even know the rule set and may be faced with a database of hashed and salted passwords of unknown distribution. In such a case, one is left with three options: 1) perform a brute force search under the assumption that the password rules forced users to choose truly random passwords, 2) use some combination of known password distributions to train a model under the hopes that the unknown distribution is sufficiently similar, or 3) attempt to approximate the unknown distribution by performing a search over the space of possible models. This paper explores the third possibility.
+
+- While the intention of rule sets are to force users to choose random passwords, human users have consistently chosen to simply adapt their predictable patterns to match new rule sets. For instance, a user who wants to enter ``password'' as their password may be thwarted by a rule requiring a number is present. Rather than selecting a new password at random that satisfies the rule, the human user is more likely to make a small edit to their initial choice, such as using ``password1'' as their password. Modern dictionary attacks have adapted to this by including a mangling phase that perturbs the dictionary according to a set of hand-crafted rules that mimic how a human may perturb their password.
+
+- Even though the length of a password does not necessarily indicate its strength, modern password cracking techniques use a generative model with a fixed length output. Thus, if there is a creation rule requiring a password to be longer than the current defacto minimum of eight characters, it seems likely that a majority of users will again adapt their internal password model to produce a predictably  structured password. In such instances, a superior model would enumerate guesses strictly in order of probabilty, without being biased a priori by the password length.
+
+- Evolving markov models for password guessing requires evaluating the candidate models based on a fixed number of guesses per candidate. While this can be costly, the approach has the appealing benefit that the number of guesses required for evaluation is \italics{inversely} proportional to the number of passwords in the database. Since the number of valid guesses defines the granularity of the search space, increasing the number of passwords to crack actually smoothens the fitness landscape and enables the algorithm to make more incremental progress. 

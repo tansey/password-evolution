@@ -60,15 +60,18 @@ namespace SharpNeatMarkovModels
                         int activationFnId = _activationFnLibrary.GetFunctionList()[0].Id;
                         return new NeuronGene(innovationId, neuronType, activationFnId);
                     }
+                case NodeType.Output:
+                    {
+                        int activationFnId = _activationFnLibrary.GetFunctionList().Last().Id;
+                        return new NeuronGene(innovationId, neuronType, activationFnId);
+                    }
                 default:
                     {
                         ActivationFunctionInfo fnInfo = _activationFnLibrary.GetRandomFunction(_rng);
                         IActivationFunction actFn = fnInfo.ActivationFunction;
                         double[] auxArgs = null;
                         if (actFn.AcceptsAuxArgs)
-                        {
                             auxArgs = actFn.GetRandomAuxArgs(_rng, _neatGenomeParamsCurrent.ConnectionWeightRange);
-                        }
 
                         return new NeuronGene(innovationId, neuronType, fnInfo.Id, auxArgs);
                     }

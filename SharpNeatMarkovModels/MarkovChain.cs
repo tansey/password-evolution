@@ -44,7 +44,8 @@ namespace SharpNeatMarkovModels
                 if (_rouletteWheels[stateIdx].Probabilities.Length == 0)
                     return s;
                 stateIdx = _nodes[stateIdx].TransitionDestinations[RouletteWheel.SingleThrow(_rouletteWheels[stateIdx], _random)];
-                s += _nodes[stateIdx].State;
+                if (_nodes[stateIdx].State != null)
+                    s += _nodes[stateIdx].State;
             }
 
             return s;
