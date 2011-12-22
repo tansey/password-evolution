@@ -42,38 +42,75 @@ namespace PasswordEvolution
         const int MAX_GENERATIONS = 200;
         static void Main(string[] args)
         {
-            //morphEnglish(ENGLISH_WORDS, MORPHED_ENGLISH_WORDS);
-            //morphEnglish(ENGLISH_WORDS, FORCED_MORPHED_ENGLISH_WORDS, minLength: 8);
-            //RunExperiment(MORPHED_ENGLISH_WORDS, MORPHED_SEED_FILE, MORPHED_CONFIG_FILE, MORPHED_RESULTS_FILE, false);
-            //RunExperiment(PASSWORD_MODEL_FILE, SEED_FILE, CONFIG_FILE, RESULTS_FILE, validateSeed: false);
-            //RunExperiment(PASSWORD_MODEL_FILE, SEED_FILE, HASHED_CONFIG_FILE, HASHED_RESULTS_FILE, true);
-            //PrintStats(@"..\..\..\passwords\morphed_english.txt");
-            //PrintStats(@"..\..\..\passwords\forced_morphed_english.txt");
-            //RunExperiment(PASSWORD_MODEL_FILE, SEED_FILE, CONFIG_FILE, RESULTS_FILE, validateSeed: false);
-            //PrepareMarkovModelRuns();
-            //Parallel.For(0, _datasetFilenames.Length, i => RunAllMarkovModelPairs(i));
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Below are some examples of possible experiments and functions you may wish to call. //
+            /////////////////////////////////////////////////////////////////////////////////////////
+
+
+            // Morph an english word dictionary into a password database where 10% of passwords have a number
+            // ToyProblemUtil.MorphEnglish(ENGLISH_WORDS, MORPHED_ENGLISH_WORDS);
+
+            // Morph an english word dictionary into a password database where all passwords are at least 8 characters
+            // and contain at least one number
+            // ToyProblemUtil.MorphEnglish(ENGLISH_WORDS, FORCED_MORPHED_ENGLISH_WORDS, requireDigit: true, minLength: 8);
+
+            // Train on the no-rule morphed english words db and evolve against the morphed english db with 
+            // the digit and length creation rules enforced.
+            // RunExperiment(MORPHED_ENGLISH_WORDS, MORPHED_SEED_FILE, MORPHED_CONFIG_FILE, MORPHED_RESULTS_FILE, false);
+
+            // Print some summary statistics about the distribution of passwords in the two morphed english dictionaries.
+            // PasswordUtil.PrintStats(@"..\..\..\passwords\morphed_english.txt"); // no creation rules
+            // PasswordUtil.PrintStats(@"..\..\..\passwords\forced_morphed_english.txt"); // digit and length rules
+
+            // Run a really big analysis comparing the first-order Markov model to an 8-layered one.
+            // PrepareMarkovModelRuns();
+            // Parallel.For(0, _datasetFilenames.Length, i => RunAllMarkovModelPairs(i));
         }
 
-        
-
-        private static void RunExperiment(string passwordModelFile, string seedFile, string configFile, string resultsFile, bool validateSeed = false)
+        /// <summary>
+        /// Trains a Markov model on a the training set of passwords, then evolves it against the target password database
+        /// specified in the config file. At the end of the evolution, the champion model is evaluated for a larger number
+        /// of guesses.
+        /// </summary>
+        /// <param name="trainingSetFile">The file containing the passwords from which to build the initial Markov model.</param>
+        /// <param name="seedFile">The file to which the initial Markov model will be saved.</param>
+        /// <param name="configFile">The file containing all the configuration parameters of the evolution.</param>
+        /// <param name="resultsFile">The file to which the results will be saved at each generation.</param>
+        /// <param name="validateSeed">If true, the seed model will first be validated against a large number of guesses.</param>
+        private static void RunExperiment(string trainingSetFile, string seedFile, string configFile, string resultsFile, bool validateSeed = false)
         {
             Console.Write("Building Markov model...");
-            var passwords = PasswordEvolutionExperiment.LoadPasswords(passwordModelFile, 8);
-            int outputs = GenerateFirstOrderMarkovFilter(seedFile, passwords);
+            
+            // Load the training set passwords from file
+            var passwords = PasswordUtil.LoadPasswords(trainingSetFile, 8); 
+            
+            // Create a Markov model from the passwords. This model will be used
+            // as our seed for the evolution.
+            int outputs = MarkovFilterCreator.GenerateFirstOrderMarkovFilter(seedFile, passwords);
+
+            // Free up the memory used by the passwords
+            passwords = null;
+
             Console.WriteLine("Done! Outputs: {0}", outputs);
 
             _experiment = new PasswordEvolutionExperiment();
             _experiment.OutputCount = outputs;
             
+            // Load the XML configuration file
             XmlDocument xmlConfig = new XmlDocument();
             xmlConfig.Load(configFile);
             _experiment.Initialize("PasswordEvolution", xmlConfig.DocumentElement);
+
+            // Set the passwords to be used by the fitness evaluator.
+            // These are the passwords our models will try to guess.
             PasswordCrackingEvaluator.Passwords = _experiment.Passwords;
 
             Console.WriteLine("Loading seed...");
+            
+            // Load the seed model that we created at the start of this function
             var seed = _experiment.LoadPopulation(XmlReader.Create(seedFile))[0];
 
+            // Validates the seed model by running it for a large number of guesses 
             if (validateSeed)
             {
                 Console.WriteLine("Validating seed model...");
@@ -81,10 +118,13 @@ namespace PasswordEvolution
                 ValidateModel(seedModel, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
             }
 
+            // Create evolution algorithm using the seed model to initialize the population
             Console.WriteLine("Creating population...");
-            // Create evolution algorithm and attach update event.
             _ea = _experiment.CreateEvolutionAlgorithm(seed);
-            _ea.UpdateEvent += new EventHandler(_ea_UpdateEvent);
+
+            // Attach an update event handler. This will be called at the end of every generation
+            // to log the progress of the evolution (see function logEvolutionProgress below).
+            _ea.UpdateEvent += new EventHandler(logEvolutionProgress);
 
             // Setup results file
             using (TextWriter writer = new StreamWriter(resultsFile))
@@ -95,9 +135,10 @@ namespace PasswordEvolution
             Console.WriteLine("Starting evolution. Pop size: {0} Guesses: {1}", _experiment.DefaultPopulationSize, _experiment.GuessesPerIndividual);
             _ea.StartContinue();
 
+            // Wait until the evolution is finished.
             while (_ea.RunState == RunState.Running) { Thread.Sleep(1000); }
 
-            // Validate the resulting model
+            // Validate the resulting model.
             var decoder = _experiment.CreateGenomeDecoder();
             var champ = decoder.Decode(_ea.CurrentChampGenome);
             ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
@@ -113,8 +154,13 @@ namespace PasswordEvolution
 
         static int _gens = 0;
         static string _generationalResultsFile;
-        static void _ea_UpdateEvent(object sender, EventArgs e)
+
+        /// <summary>
+        /// This method is called at the end of every generation and logs the progress of the EA.
+        /// </summary>
+        static void logEvolutionProgress(object sender, EventArgs e)
         {
+            // Write the results to file.
             using (TextWriter writer = new StreamWriter(_generationalResultsFile, true))
             {
                 Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
@@ -140,40 +186,39 @@ namespace PasswordEvolution
                 }
                 Console.WriteLine("Done.");
             }
+
             // Save the best genome to file
             var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { _ea.CurrentChampGenome }, true);
             doc.Save(CHAMPION_FILE);
 
+            // If we've reached the maximum number of generations,
+            // tell the algorithm to stop.
             if (_gens >= MAX_GENERATIONS)
                 _ea.Stop();
 
             _gens++;
         }
 
+        #region Code to run the static model comparison of first-order vs. layered
+        // TODO: Clean up and refactor this entire section.
+
         static Dictionary<string, int>[] _passwords;
-        static PasswordDataset[] _datasetFilenames;
+        static PasswordDatasetInfo[] _datasetFilenames;
         static object _writerLock = new object();
-        static bool[] _finished;
-        static bool AllFinished()
-        {
-            lock (_finished)
-                foreach (bool b in _finished)
-                    if (!b)
-                        return false;
-            return true;
-        }
+
+        // Loads all the passwords and the configuration file.
         static void PrepareMarkovModelRuns()
         {
             const string PASSWORD_OFFSET = @"..\..\..\passwords\";
-            _datasetFilenames = new PasswordDataset[]
+            _datasetFilenames = new PasswordDatasetInfo[]
             {
                 //new PasswordDataset(){ Filename = "faithwriters-withcount.txt", Name = "faithwriters" },
                 //new PasswordDataset(){ Filename = "myspace-filtered-withcount.txt", Name = "myspace" },
                 //new PasswordDataset(){ Filename = "phpbb-withcount.txt", Name = "phpbb" },
                 //new PasswordDataset(){ Filename = "rockyou-withcount.txt", Name = "rockyou" },
                 //new PasswordDataset(){ Filename = "singles.org-withcount.txt", Name = "singles.org" },
-                new PasswordDataset() { Filename = "morphed_english.txt", Name = "training" },
-                new PasswordDataset() { Filename = "forced_morphed_english.txt", Name = "testing" }
+                new PasswordDatasetInfo() { Filename = "morphed_english.txt", Name = "training" },
+                new PasswordDatasetInfo() { Filename = "forced_morphed_english.txt", Name = "testing" }
             };
 
             Console.WriteLine("Loading all {0} password datasets...", _datasetFilenames.Length);
@@ -181,11 +226,9 @@ namespace PasswordEvolution
             for (int i = 0; i < _passwords.Length; i++)
             {
                 Console.WriteLine(_datasetFilenames[i].Name);
-                _passwords[i] = PasswordEvolutionExperiment.LoadPasswords(PASSWORD_OFFSET + _datasetFilenames[i].Filename);
+                _passwords[i] = PasswordUtil.LoadPasswords(PASSWORD_OFFSET + _datasetFilenames[i].Filename);
             }
             Console.WriteLine("Done.");
-
-            _finished = new bool[_datasetFilenames.Length];
 
             _experiment = new PasswordEvolutionExperiment();
 
@@ -197,6 +240,8 @@ namespace PasswordEvolution
             using (TextWriter writer = new StreamWriter(@"..\..\..\experiments\summary_results.csv"))
                 writer.WriteLine("TrainingSet,TestingSet,Accounts Cracked,Passwords Cracked,% Accounts,% Passwords");
         }
+
+        // Runs a comparison of the two model types.
         static void RunAllMarkovModelPairs(object special)
         {
             const string EXPERIMENT_OFFSET = @"..\..\..\experiments\intermediate\";
@@ -206,8 +251,6 @@ namespace PasswordEvolution
                 "8-layer"
             };
             
-
-
             // For every dataset, create a model
             for (int i = 0; i < _datasetFilenames.Length; i++)
             {
@@ -219,9 +262,9 @@ namespace PasswordEvolution
                     string seedFile = EXPERIMENT_OFFSET + "seed-" + models[m] + "-" + _datasetFilenames[i].Name + ".xml";
                     Console.Write("Building {0} Markov model...", models[m]);
                     if (m == 0)
-                        outputs = GenerateFirstOrderMarkovFilter(seedFile, _passwords[i]);
+                        outputs = MarkovFilterCreator.GenerateFirstOrderMarkovFilter(seedFile, _passwords[i]);
                     else
-                        outputs = GenerateNthOrderMarkovFilter(seedFile, _passwords[i], 8);
+                        outputs = MarkovFilterCreator.GenerateLayeredMarkovFilter(seedFile, _passwords[i], 8);
 
                     Console.WriteLine("Done! Outputs: {0}", outputs);
                     _experiment.OutputCount = outputs;
@@ -235,11 +278,9 @@ namespace PasswordEvolution
                     // For every dataset, test the model
                     for (int j = 0; j < _datasetFilenames.Length; j++)
                     {
-                        //PasswordCrackingEvaluator.Passwords = passwords[j];
                         Console.Write("Validating {0} {1} model on {2} with {3} guesses... ", models[m], _datasetFilenames[i].Name, _datasetFilenames[j].Name, VALIDATION_GUESSES);
                         PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(VALIDATION_GUESSES, false);
-                        eval.OneTimePasswordDeal = _passwords[j];
-                        var results = eval.Validate(model, EXPERIMENT_OFFSET + models[m] + "-" + _datasetFilenames[i].Name + "-" + _datasetFilenames[j].Name + ".csv", 10000);
+                        var results = eval.Validate(model, _passwords[j], EXPERIMENT_OFFSET + models[m] + "-" + _datasetFilenames[i].Name + "-" + _datasetFilenames[j].Name + ".csv", 10000);
                         Console.WriteLine("Accounts: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
 
                         lock(_writerLock)
@@ -248,627 +289,17 @@ namespace PasswordEvolution
                                     _datasetFilenames[i].Name, 
                                     _datasetFilenames[j].Name, 
                                     results._fitness, 
-                                    results._alternativeFitness, 
-                                    results._fitness / (double)eval.OneTimePasswordDeal.Sum(kv => kv.Value) * 100, 
-                                    results._alternativeFitness / (double)eval.OneTimePasswordDeal.Count * 100); 
-                    }
-                }
-            }
-            lock(_finished)
-                _finished[(int)special] = true;
-        }
-
-        static void PrintStats(string filename)
-        {
-            PrintStats(PasswordEvolutionExperiment.LoadPasswords(filename));
-        }
-
-        static void PrintStats(Dictionary<string, int> passwords)
-        {
-            int total = passwords.Count;
-            int lowercase = 0;
-            int numerical = 0;
-            int nonAlphaNumeric = 0;
-            int uppercase = 0;
-            int[] lengths = new int[20];
-
-            foreach (var kv in passwords)
-            {
-                bool hasNum = false, hasNonAN = false, hasUpper = false, hasLower = false;
-                string key = kv.Key;
-
-                lengths[key.Length > 20 ? 19 : key.Length - 1]++;
-
-                for (int i = 0; i < key.Length; i++)
-                {
-                    char c = key[i];
-                    if (c.IsLowerCase())
-                    {
-                        if (!hasLower)
-                        {
-                            hasLower = true;
-                            lowercase++;
-                        }
-                    }
-                    else if (c.IsNumeric())
-                    {
-                        if (!hasNum)
-                        {
-                            hasNum = true;
-                            numerical++;
-                        }
-                    }
-                    else if (c.IsUpperCase())
-                    {
-                        if (!hasUpper)
-                        {
-                            hasUpper = true;
-                            uppercase++;
-                        }
-                    }
-                    else
-                    {
-                        if (!hasNonAN)
-                        {
-                            hasNonAN = true;
-                            nonAlphaNumeric++;
-                        }
-                    }
-                }
-            }
-
-            Console.WriteLine("Total Accounts: {0}", passwords.Sum(kp => kp.Value));
-            Console.WriteLine("Total Unique Passwords: {0}", total);
-            Console.WriteLine("- Contain lowercase: {0} ({1:N2}%)", lowercase, lowercase / (double)total * 100);
-            Console.WriteLine("- Contain uppercase: {0} ({1:N2}%)", uppercase, uppercase / (double)total * 100);
-            Console.WriteLine("- Contain number:    {0} ({1:N2}%)", numerical, numerical / (double)total * 100);
-            Console.WriteLine("- Contain other:     {0} ({1:N2}%)", nonAlphaNumeric, nonAlphaNumeric / (double)total * 100);
-            Console.WriteLine("Length distributions:");
-            for (int i = 0; i < lengths.Length; i++)
-                if (lengths[i] != 0)
-                    Console.WriteLine("{2}{0}: {1}", i + 1, lengths[i], i == lengths.Length - 1 ? ">= " : "");
-        }
-
-        static int GenerateFirstOrderMarkovFilter(string filename, string corpus)
-        {
-            var passwords = PasswordEvolutionExperiment.LoadPasswords(corpus);
-            return GenerateFirstOrderMarkovFilter(filename, passwords);
-        }
-            
-        static int GenerateFirstOrderMarkovFilter(string filename, Dictionary<string, int> passwords)
-        {
-            Console.WriteLine("Creating First-Order Markov Filter");
-            double[] fnFreqs = calculateFnFreqs(passwords);
-
-            StringBuilder functions = new StringBuilder();
-            string functionFormat = "<Fn id=\"{0}\" name=\"MC-{1}\" prob=\"{2}\" />";
-
-            for (int i = 0; i < 95; i++)
-                functions.AppendLine(string.Format(functionFormat, i, SecurityElement.Escape(((char)(i + 32)).ToString()), fnFreqs[i]));
-            functions.AppendLine(string.Format(functionFormat, 95, "END", 0));
-
-            double[][] freqs = calculateTransitionFreqs(passwords);
-
-            StringBuilder nodes = new StringBuilder();
-            string nodeFormat = "<Node type=\"out\" id=\"{0}\" fnId=\"{1}\" />";
-            
-            StringBuilder connections = new StringBuilder();
-            string connFormat = "<Con id=\"{0}\" src=\"{1}\" tgt=\"{2}\" wght=\"{3}\" />";
-
-            int nextId = 97;
-
-            for (int i = 0; i < 95; i++)
-            {
-                int nodeId = i+2;
-
-                // Add the next character node
-                nodes.AppendLine(string.Format(nodeFormat, nodeId, i));
-
-                // Add a connection from the origin to the character node
-                if(freqs[0][i] > 0)
-                    connections.AppendLine(string.Format(connFormat, nextId++, 1, nodeId, freqs[0][i]));
-
-                for(int j = 0; j < 95; j++)
-                    if(freqs[i+1][j] > 0)
-                        connections.AppendLine(string.Format(connFormat, nextId++, nodeId, j+2, freqs[i+1][j]));
-            }
-            using (TextWriter writer = new StreamWriter(filename))
-            {
-                writer.WriteLine(SEED_START);
-                writer.WriteLine(functions.ToString());
-                writer.WriteLine(SEED_2);
-                writer.WriteLine(nodes.ToString());
-                writer.WriteLine(SEED_MIDDLE);
-                writer.WriteLine(connections.ToString());
-                writer.WriteLine(SEED_END);
-            }
-
-            return 95;
-        }
-
-        static int GenerateNthOrderMarkovFilter(string filename, string corpus, int layers)
-        {
-            var passwords = PasswordEvolutionExperiment.LoadPasswords(corpus);
-            return GenerateNthOrderMarkovFilter(filename, passwords, layers);
-        }
-        static int GenerateNthOrderMarkovFilter(string filename, Dictionary<string, int> passwords, int layers)
-        {
-            Console.WriteLine("Creating Nth-Order Markov Filter. Layers: {0}", layers);
-            double[] fnFreqs = calculateFnFreqs(passwords);
-
-            StringBuilder functions = new StringBuilder();
-            string functionFormat = "<Fn id=\"{0}\" name=\"MC-{1}\" prob=\"{2}\" />";
-
-            for (int i = 0; i < 95; i++)
-                functions.AppendLine(string.Format(functionFormat, i, SecurityElement.Escape(((char)(i + 32)).ToString()), 0));//fnFreqs[i]));
-            functions.AppendLine(string.Format(functionFormat, 95, "END", 0));
-
-            double[, ,] freqs = calculateNthOrderFreqs(passwords, layers);
-
-            StringBuilder nodes = new StringBuilder();
-            string nodeFormat = "<Node type=\"{2}\" id=\"{0}\" fnId=\"{1}\" />";
-
-            StringBuilder connections = new StringBuilder();
-            string connFormat = "<Con id=\"{0}\" src=\"{1}\" tgt=\"{2}\" wght=\"{3}\" />";
-
-            int nextId = 2;
-            int[] prevTargets = new int[freqs.GetLength(2)];
-
-            // The input node has an ID of 1
-            for (int i = 0; i < prevTargets.Length; i++)
-                prevTargets[i] = 1;
-            int outputNodes = 0;
-
-            for (int i = 0; i < freqs.GetLength(0); i++)
-            {
-                int[] targets = new int[freqs.GetLength(2)];
-
-                // Check if we ever transition to each 
-                // of the k nodes in the next layer.
-                // If we detect a node that never gets transitioned into,
-                // then we do not need to add it to the network.
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        if (targets[k] == 0 && freqs[i, j, k] > 0)
-                        {
-                            targets[k] = nextId++;
-                            // Add the next character node
-                            nodes.AppendLine(string.Format(nodeFormat, targets[k], k, i == freqs.GetLength(0) - 1 ? "out" : "hid"));
-                            if(i == freqs.GetLength(0) - 1)
-                                outputNodes++;
-                        }
-
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        if (freqs[i, j, k] > 0)
-                            connections.AppendLine(string.Format(connFormat, nextId++, prevTargets[j], targets[k], freqs[i, j, k]));
-
-                prevTargets = targets;
-            }
-            using (TextWriter writer = new StreamWriter(filename))
-            {
-                writer.WriteLine(SEED_START);
-                writer.WriteLine(functions.ToString());
-                writer.WriteLine(SEED_2);
-                writer.WriteLine(nodes.ToString());
-                writer.WriteLine(SEED_MIDDLE);
-                writer.WriteLine(connections.ToString());
-                writer.WriteLine(SEED_END);
-            }
-            return outputNodes;
-        }
-
-        static int GenerateTrueMarkovFilter(string filename, string corpus, int layers)
-        {
-            var passwords = PasswordEvolutionExperiment.LoadPasswords(corpus);
-            return GenerateTrueMarkovFilter(filename, passwords);
-        }
-        static int GenerateTrueMarkovFilter(string filename, Dictionary<string, int> passwords)
-        {
-            Console.WriteLine("Creating True Markov Filter");
-            double[] fnFreqs = calculateFnFreqs(passwords);
-
-            StringBuilder functions = new StringBuilder();
-            string functionFormat = "<Fn id=\"{0}\" name=\"MC-{1}\" prob=\"{2}\" />";
-
-            for (int i = 0; i < 95; i++)
-                functions.AppendLine(string.Format(functionFormat, i, SecurityElement.Escape(((char)(i + 32)).ToString()), fnFreqs[i]));
-            functions.AppendLine(string.Format(functionFormat, 95, "END", 0));
-
-
-            double[, ,] freqs = calculateAdaptiveFreqs(passwords);
-
-            StringBuilder nodes = new StringBuilder();
-            string nodeFormat = "<Node type=\"{2}\" id=\"{0}\" fnId=\"{1}\" />";
-
-            StringBuilder connections = new StringBuilder();
-            string connFormat = "<Con id=\"{0}\" src=\"{1}\" tgt=\"{2}\" wght=\"{3}\" />";
-            nodes.AppendLine(string.Format(nodeFormat, 2, 95, "out"));
-
-            int nextId = 3;
-            int[] prevTargets = new int[freqs.GetLength(2)];
-
-            // The input node has an ID of 1
-            for (int i = 0; i < prevTargets.Length; i++)
-                prevTargets[i] = 1;
-
-            int outputNodeIdx = freqs.GetLength(2) - 1;
-            for (int i = 0; i < freqs.GetLength(0); i++)
-            {
-                int[] targets = new int[outputNodeIdx];
-
-                // Check if we ever transition to each 
-                // of the k nodes in the next layer.
-                // If we detect a node that never gets transitioned into,
-                // then we do not need to add it to the network.
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                    for (int k = 0; k < outputNodeIdx; k++)
-                        if (targets[k] == 0 && freqs[i, j, k] > 0)
-                        {
-                            targets[k] = nextId++;
-                            // Add the next character node
-                            nodes.AppendLine(string.Format(nodeFormat, targets[k], k, "hid"));
-                        }
-
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                    for (int k = 0; k <= outputNodeIdx; k++)
-                        if (freqs[i, j, k] > 0)
-                            connections.AppendLine(string.Format(connFormat, nextId++, prevTargets[j], k == outputNodeIdx ? 2 : targets[k], freqs[i, j, k]));
-                prevTargets = targets;
-            }
-            using (TextWriter writer = new StreamWriter(filename))
-            {
-                writer.WriteLine(SEED_START);
-                writer.WriteLine(functions.ToString());
-                writer.WriteLine(SEED_2);
-                writer.WriteLine(nodes.ToString());
-                writer.WriteLine(SEED_MIDDLE);
-                writer.WriteLine(connections.ToString());
-                writer.WriteLine(SEED_END);
-            }
-            return 1;
-        }
-
-
-        /// <summary>
-        /// Calculates the zeroth-order markov chain. That is, the probability of each
-        /// character given the previous character.
-        /// </summary>
-        static double[][] calculateTransitionFreqs(Dictionary<string, int> passwords)
-        {
-            double[][] freqs = new double[96][];
-            for (int i = 0; i < 96; i++)
-                freqs[i] = new double[95];
-            foreach(var wordcount in passwords)
-            {
-                if (wordcount.Key.Length == 0)
-                    continue;
-
-                int key = (int)wordcount.Key[0] - 32;
-                if(key >= 0 && key < 95)
-                    freqs[0][key]++;
-                for (int i = 1; i < wordcount.Key.Length; i++)
-                {
-                    int cur = (int)wordcount.Key[i - 1] - 32 + 1;
-                    int next = (int)wordcount.Key[i] - 32;
-                    if(cur >= 1 && cur < 96 && next >= 0 && next < 95)
-                        freqs[cur][next] += wordcount.Value;
-                }
-            }
-
-            // Normalize
-            for (int i = 0; i < 96; i++)
-            {
-                double sum = freqs[i].Sum();
-                if (sum == 0)
-                    continue;
-                for (int j = 0; j < 95; j++)
-                    freqs[i][j] = freqs[i][j] / sum;
-            }
-
-            return freqs;
-        }
-
-        /// <summary>
-        /// Calculates the zeroth-order markov chain. That is, the probability of each
-        /// character in the file.
-        /// </summary>
-        static double[] calculateFnFreqs(Dictionary<string, int> passwords)
-        {
-            double[] freqs = new double[95];
-            for (int i = 0; i < freqs.Length; i++)
-                freqs[i] = 1;
-
-            foreach(var wc in passwords)
-                for (int i = 0; i < wc.Key.Length; i++)
-                {
-                    int key = (int)wc.Key[i] - 32;
-                    if(key >= 0 && key < 95)
-                        freqs[key] += wc.Value;
-                }
-            
-            double sum = freqs.Sum();
-            for (int i = 0; i < freqs.Length; i++)
-                freqs[i] = freqs[i] / sum;
-
-            return freqs;
-        }
-
-        static double[,,] calculateNthOrderFreqs(Dictionary<string,int> passwords, int layers)
-        {
-            double[,,] freqs = new double[layers,95,95];
-
-            foreach(var wordcount in passwords)
-            {
-                int prev = 0;
-                for (int i = 0; i < wordcount.Key.Length; i++)
-                {
-                    int cur = (int)wordcount.Key[i] - 32;
-                    if (cur < 95 && cur >= 0 && prev < 95 && prev >= 0)
-                    {
-                        int layer = i < layers ? i : layers - 1;
-                        freqs[layer, prev, cur] += wordcount.Value;
-                    }
-                    prev = cur;
-                }
-            }
-
-            // For every layer in this network
-            for (int i = 0; i < freqs.GetLength(0); i++)
-            {
-                // For every node in this layer
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                {
-                    double sum = 0;
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        sum += freqs[i, j, k];
-
-                    // If we never transitioned from j to k, just skip it
-                    if (sum == 0)
-                        continue;
-
-                    // Set the probabilities of transition from j to k
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        freqs[i, j, k] /= sum;
-                }
-            }
-            return freqs;
-        }
-
-        static double[, ,] calculateAdaptiveFreqs(Dictionary<string, int> passwords)
-        {
-            // We need to figure out the largest possible password in the database
-            int layers = passwords.Keys.Max(s=> s.Length) + 1;
-            Console.WriteLine("Layers: {0}", layers);
-            
-            double[,,] freqs = new double[layers, 95, 96];
-
-            foreach (var wordcount in passwords)
-            {
-                int prev = 0;
-                for (int i = 0; i < wordcount.Key.Length; i++)
-                {
-                    int cur = (int)wordcount.Key[i] - 32;
-                    if (cur < 95 && cur >= 0 && prev < 95 && prev >= 0)
-                        freqs[i, prev, cur] += wordcount.Value;
-                    prev = cur;
-                }
-                // Only real difference between calculateNthOrderFreqs is that we 
-                // now track the probability of a character being the end of a word.
-                if (prev < 95 && prev >= 0)
-                    freqs[wordcount.Key.Length, prev, 95] += wordcount.Value;
-            }
-
-            // For every layer in this network
-            for (int i = 0; i < freqs.GetLength(0); i++)
-            {
-                // For every node in this layer
-                for (int j = 0; j < freqs.GetLength(1); j++)
-                {
-                    double sum = 0;
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        sum += freqs[i, j, k];
-
-                    // If we never transitioned from j to k, just skip it
-                    if (sum == 0)
-                        continue;
-
-                    // Set the probabilities of transition from j to k
-                    for (int k = 0; k < freqs.GetLength(2); k++)
-                        freqs[i, j, k] /= sum;
-                }
-            }
-            return freqs;
-        }
-
-        static void morphEnglish(string inFile, string outFile, bool counts = false, int minLength = 0)
-        {
-            var english = PasswordEvolutionExperiment.LoadPasswords(inFile);
-            var morphed = morphEnglish(english, minLength);
-            using (TextWriter writer = new StreamWriter(outFile))
-                foreach (var kv in morphed)
-                    if (counts)
-                        writer.WriteLine("{0} {1}", kv.Value, kv.Key);
-                    else
-                        writer.WriteLine(kv.Key);
-        }
-
-        static Dictionary<string, int> morphEnglish(Dictionary<string, int> english, int minLength = 0)
-        {
-            Dictionary<string, int> results = new Dictionary<string, int>();
-
-            FastRandom random = new FastRandom();
-            double[] digitProbs = new double[]
-            {
-                0.14, //0
-                0.3,//1
-                0.07,//2
-                0.07,//3
-                0.07, //4
-                0.07, //5
-                0.07, //6
-                0.07, //7
-                0.07, //8
-                0.07 //9
-            };
-            double[] posProbs = new double[]
-            {
-                //0.9,
-                //0.025,
-                //0.06,
-                //0.015
-                0,//do nothing
-                0.25,//prepend
-                0.6,//append
-                0.15//random
-            };
-            Console.WriteLine("Probs sum: {0}", digitProbs.Sum());
-            RouletteWheelLayout digitLayout = new RouletteWheelLayout(digitProbs);
-            RouletteWheelLayout posLayout = new RouletteWheelLayout(posProbs);
-            int alreadyNumbered = 0;
-            foreach (string s in english.Keys)
-            {
-                bool numbered = false;
-                for(int i = 0; i < s.Length; i++)
-                    if (s[i] >= '0' && s[i] <= '9')
-                    {
-                        alreadyNumbered++;
-                        numbered = true;
-                        break;
-                    }
-                string morphedPassword = s;
-                while(!numbered || morphedPassword.Length < minLength)
-                {
-                    int toAdd = RouletteWheel.SingleThrow(digitLayout, random);
-                    int pos = RouletteWheel.SingleThrow(posLayout, random);
-
-                    if (pos == 0)
-                        break;
-                    else if (pos == 1)
-                        morphedPassword = toAdd + morphedPassword;
-                    else if (pos == 2)
-                        morphedPassword = morphedPassword + toAdd;
-                    else
-                    {
-                        pos = random.Next(morphedPassword.Length);
-                        morphedPassword = morphedPassword.Substring(0, pos) + toAdd + morphedPassword.Substring(pos, morphedPassword.Length - pos);
-                    }
-                    numbered = true;
-                }
-                int val;
-                if (!results.TryGetValue(morphedPassword, out val))
-                    results.Add(morphedPassword, 1);
-            }
-            Console.WriteLine("Had numbers already: {0}", alreadyNumbered);
-            return results;
-        }
-
-        private static void ProcessHackForumsFile()
-        {
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\hackforums.sql"))
-            {
-                string line = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("INSERT INTO"))
-                        break;
-                }
-                using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\hackforums.txt"))
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        if (line == "")
-                            continue;
-                        int quotes = 0;
-                        int start = 0;
-                        int end = 0;
-                        for (int i = 0; i < line.Length; i++)
-                            if (line[i] == '\'')
-                            {
-                                quotes++;
-                                if (quotes == 3)
-                                    start = i + 1;
-                                if (quotes == 4)
-                                {
-                                    end = i;
-                                    break;
-                                }
-                            }
-                        string password = line.Substring(start, end - start);
-
-                        start = end + 4;
-                        end = line.IndexOf("\'", start + 1);
-                        string salt = line.Substring(start, end - start);
-                        writer.WriteLine("\"\";\"{0}\";\"{1}\"", password, salt);
-                    }
-            }
-        }
-
-        private static void ProcessBattlefieldHeroesFile()
-        {
-            Dictionary<string, int> passwords = new Dictionary<string, int>();
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\battlefield_heroes.csv"))
-            {
-                string line = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line == "")
-                        continue;
-
-                    var tokens = line.Split(';');
-                    string pw = tokens.Last().Trim('"');
-                    int val;
-                    if (!passwords.TryGetValue(pw, out val))
-                        passwords.Add(pw, 0);
-
-                    passwords[pw]++;
-                }
-            }
-            using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\battlefield_heroes.txt"))
-                foreach (var kv in passwords.OrderByDescending(s => s.Value))
-                    writer.WriteLine(kv.Value + " " + kv.Key);
-        }
-
-        private static void ProcessMySpaceFile()
-        {
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\myspace-unfiltered-withcount.txt"))
-            {
-                using(TextWriter writer = new StreamWriter(@"..\..\..\passwords\myspace-filtered-withcount.txt"))
-                {
-                    string line = null;
-                    while((line = reader.ReadLine()) != null)
-                    {
-                        if(line == "")
-                            continue;
-                        
-                        line = line.TrimStart();
-                        string[] tokens = line.Split();
-                        string pw = tokens.Length == 1 ? line : tokens.Skip(1).Concatenate(" ");
-                        
-                        if(!pw.ContainsNumber() || pw.Length > 20 || pw.Length < 6)
-                            continue;
-
-                        writer.WriteLine(line);
+                                    results._alternativeFitness,
+                                    results._fitness / (double)_passwords[j].Sum(kv => kv.Value) * 100,
+                                    results._alternativeFitness / (double)_passwords[j].Count * 100); 
                     }
                 }
             }
         }
+        #endregion
 
-        const string SEED_START = "<Root>\r\n" +
-  "<ActivationFunctions>\r\n";
-        const string SEED_2 =
-  "</ActivationFunctions>\r\n" +
-  "<Networks>\r\n" +
-    "<Network id=\"0\" birthGen=\"0\" fitness=\"0\">\r\n" +
-      "<Nodes>\r\n" +
-        "<Node type=\"bias\" id=\"0\" fnId=\"0\" />\r\n" +
-        "<Node type=\"in\" id=\"1\" fnId=\"0\" />\r\n";
-    const string SEED_MIDDLE =
-        "</Nodes>\r\n" +
-      "<Connections>\r\n";
-    const string SEED_END =
-      "</Connections>\r\n" +
-    "</Network>\r\n" +
-  "</Networks>\r\n" +
-"</Root>\r\n";
+
+
+
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PasswordEvolution
 {
-    public struct PasswordDataset
+    public struct PasswordDatasetInfo
     {
         public string Filename;
         public string Name;

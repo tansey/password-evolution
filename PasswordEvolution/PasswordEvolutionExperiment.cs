@@ -139,7 +139,7 @@ namespace PasswordEvolution
                 int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
                 if (pwLength.HasValue)
                     Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
-                _passwords = LoadPasswords(pwdfile, pwLength);
+                _passwords = PasswordUtil.LoadPasswords(pwdfile, pwLength);
             }
             else
                 Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
@@ -161,57 +161,7 @@ namespace PasswordEvolution
             _activationFnLibrary = MarkovActivationFunctionLibrary.CreateLibraryMc(_states);
         }
 
-        public static Dictionary<string, int> LoadPasswords(string pwdfile, int? length = null)
-        {
-            var passwords = new Dictionary<string, int>();
-            ulong best = 0;
-            int[] countsHistogram = new int[20];
-            using (TextReader reader = new StreamReader(pwdfile))
-            {
-                string line = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    line = line.TrimStart();
-                    if (line == "")
-                        continue;
-                    string[] tokens = line.Split();
-
-                    string pw = tokens.Length == 1 ? line : tokens.Skip(1).Concatenate(" ");
-                    
-                    // Check if something went wrong or the database had a weird token
-                    if (pw.Length == 0)
-                        continue;
-
-                    int count = tokens.Length == 1 ? 1 : int.Parse(tokens[0]);
-
-                    if (!length.HasValue || pw.Length == length.Value)
-                    {
-                        // Add it to the list
-                        try
-                        {
-                            passwords.Add(pw, count);
-                            best += (ulong)count;
-                            if (count < countsHistogram.Length)
-                                countsHistogram[(int)(count - 1)]++;
-                            else
-                                countsHistogram[countsHistogram.Length - 1]++;
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            Console.WriteLine("Uniques: {0}", passwords.Values.Count);
-            Console.WriteLine("Best possible: {0}", best);
-            Console.WriteLine("Contains \"password\"? {0}", passwords.ContainsKey("password"));
-            for (int i = 0; i < countsHistogram.Length; i++)
-                Console.WriteLine("PWs of Count {0}: {1}", i + 1, countsHistogram[i]);
-
-            return passwords;
-        }
+        
 
         /// <summary>
         /// Load a population of genomes from an XmlReader and returns the genomes in a new list.
