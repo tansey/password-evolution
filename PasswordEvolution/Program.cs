@@ -38,7 +38,7 @@ namespace PasswordEvolution
         const string HASHED_PASSWORDS_FILE = @"..\..\..\passwords\battlefield_heroes.txt";
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
-        const int VALIDATION_GUESSES = 300000000;
+        const int VALIDATION_GUESSES = 1000000000;
         const int MAX_GENERATIONS = 200;
         static void Main(string[] args)
         {
