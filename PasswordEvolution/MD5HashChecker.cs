@@ -7,6 +7,11 @@ using System.IO;
 
 namespace PasswordEvolution
 {
+    /// <summary>
+    /// An MD5 hashing algorithm wrapper that enables you to query if a certain password
+    /// is in a hashed database. Currently only hashed databases are supported. Salting
+    /// is not implemented.
+    /// </summary>
     public class MD5HashChecker
     {
         MD5 _md5;
@@ -59,6 +64,9 @@ namespace PasswordEvolution
 
         }
 
+        /// <summary>
+        /// Sanity check to verify that some really common passwords are in the database.
+        /// </summary>
         public void PrintCounts()
         {
             Console.WriteLine("Highest reused password count: {0}", _passwords.Max(kv => kv.Value));
@@ -75,6 +83,11 @@ namespace PasswordEvolution
             Console.WriteLine("Is it \"heroes\"? {0}", InDatabase("heroes"));
         }
 
+        /// <summary>
+        /// Checks if a password is in the hashed database and returns the number of accounts with that password.
+        /// </summary>
+        /// <param name="pw">The password to guess.</param>
+        /// <returns>The number of accounts that used the guessed password.</returns>
         public int InDatabase(string pw)
         {
             if (_salts == null)
@@ -99,6 +112,11 @@ namespace PasswordEvolution
             return 0;
         }
 
+        /// <summary>
+        /// Hashes a string with the MD5 algorithm and returns the result.
+        /// </summary>
+        /// <param name="pw">The string to hash.</param>
+        /// <returns>The hashed string.</returns>
         public string GetMd5Hash(string pw)
         {
             byte[] data = _md5.ComputeHash(Encoding.UTF8.GetBytes(pw));
