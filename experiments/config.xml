@@ -9,15 +9,13 @@
     <Iters>8</Iters>
   </Activation>
   <PasswordLength>8</PasswordLength>
-  <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
-  <ComplexityThreshold>100</ComplexityThreshold>
   <Description>
     Evolutionary Password Cracking
  
     Fitness is the number of passwords cracked by the individual.
   </Description>
-  <Guesses>20000000</Guesses>
+  <Guesses>10000000</Guesses>
   <Hashed>False</Hashed>
-  <ValidationGuesses>2000000000</ValidationGuesses>
+  <ValidationGuesses>1000000000</ValidationGuesses>
   <PasswordFile>..\..\..\passwords\myspace-filtered-withcount.txt</PasswordFile>
 </Config>
