@@ -65,6 +65,10 @@ namespace PasswordEvolution
             // Run a really big analysis comparing the first-order Markov model to an 8-layered one.
             // PrepareMarkovModelRuns();
             // Parallel.For(0, _datasetFilenames.Length, i => RunAllMarkovModelPairs(i));
+
+            // Check if a database of hashed passwords contains some common passwords (check for creation rules)
+            // MD5HashChecker md5 = new MD5HashChecker(@"..\..\..\passwords\stratfor_hashed.txt");
+            // md5.PrintCounts();
         }
 
         /// <summary>
