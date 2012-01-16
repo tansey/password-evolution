@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <PopulationSize>100</PopulationSize>
+  <SpecieCount>10</SpecieCount>
+  <Activation>
+    <Scheme>CyclicFixedIters</Scheme>
+    <MaxIters>12</MaxIters>
+    <Threshold>0</Threshold>
+    <Iters>8</Iters>
+  </Activation>
+  <PasswordLength>8</PasswordLength>
+  <Description>
+    Evolutionary Password Cracking
+ 
+    Fitness is the number of passwords cracked by the individual.
+  </Description>
+  <Guesses>10000</Guesses>
+  <Hashed>False</Hashed>
+  <ValidationGuesses>10000</ValidationGuesses>
+  <PasswordFile>..\..\..\passwords\rockyou-withcount.txt</PasswordFile>
+</Config>
