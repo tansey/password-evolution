@@ -38,8 +38,15 @@ namespace PasswordEvolution
         const string HASHED_PASSWORDS_FILE = @"..\..\..\passwords\battlefield_heroes.txt";
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
-        const int VALIDATION_GUESSES = 1000000000;
-        const int MAX_GENERATIONS = 200;
+        const int VALIDATION_GUESSES = 10000;// = 1000000000;
+        const int MAX_GENERATIONS = 10;//= 200;
+
+        const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
+        const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
+        const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
+        const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
+
+
         static void Main(string[] args)
         {
             /////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +64,11 @@ namespace PasswordEvolution
             // Train on the no-rule morphed english words db and evolve against the morphed english db with 
             // the digit and length creation rules enforced.
             // RunExperiment(MORPHED_ENGLISH_WORDS, MORPHED_SEED_FILE, MORPHED_CONFIG_FILE, MORPHED_RESULTS_FILE, false);
+
+
+            //Train on the phppb dataset and evolve against the rockyou dataset
+            RunExperiment(PHPBB_DATASET, PHPBB_SEED_FILE, PHPBB_CONFIG_FILE, PHPBB_RESULTS_FILE, false);
+
 
             // Print some summary statistics about the distribution of passwords in the two morphed english dictionaries.
             // PasswordUtil.PrintStats(@"..\..\..\passwords\morphed_english.txt"); // no creation rules
@@ -187,10 +199,19 @@ namespace PasswordEvolution
                                                                  _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
                                                                  _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
                                                                  _experiment.Evaluator.FoundPasswords.Count);
+                    
+                    /* Remove words from the dictionary at the end of the generation */
+                   
+                      /*  foreach (string p in _experiment.Evaluator.FoundPasswords)
+                        {
+                            PasswordCrackingEvaluator.Passwords.Remove(p);
+                              _experiment.Passwords.Remove(p);
+                        }*/
+                    
                 }
                 Console.WriteLine("Done.");
             }
-
+          
             // Save the best genome to file
             var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { _ea.CurrentChampGenome }, true);
             doc.Save(CHAMPION_FILE);
@@ -201,6 +222,7 @@ namespace PasswordEvolution
                 _ea.Stop();
 
             _gens++;
+
         }
 
         #region Code to run the static model comparison of first-order vs. layered
