@@ -46,6 +46,10 @@ namespace PasswordEvolution
         const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
 
+        ////
+        //static HashSet<string> crackedPasswords;
+        ////
+
 
         static void Main(string[] args)
         {
@@ -120,6 +124,9 @@ namespace PasswordEvolution
             // Set the passwords to be used by the fitness evaluator.
             // These are the passwords our models will try to guess.
             PasswordCrackingEvaluator.Passwords = _experiment.Passwords;
+            //// 
+            //Console.WriteLine("Password Dictionary Size: {0}", _experiment.Passwords.Count);
+            ////
 
             Console.WriteLine("Loading seed...");
             
@@ -183,6 +190,8 @@ namespace PasswordEvolution
                                                          _ea.CurrentChampGenome.EvaluationInfo.Fitness,
                                                          _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
                                                          _experiment.Evaluator.FoundPasswords.Count);
+                //crackedPasswords = _experiment.Evaluator.FoundPasswords; 
+
                 lock (_experiment.Evaluator.FoundPasswords)
                 {
                     Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
@@ -220,6 +229,12 @@ namespace PasswordEvolution
             // tell the algorithm to stop.
             if (_gens >= MAX_GENERATIONS)
                 _ea.Stop();
+
+            //foreach (String foundPassword in crackedPasswords)
+            //{
+            //    Console.WriteLine("Removing: {0}", foundPassword);
+            //    PasswordCrackingEvaluator.Passwords.Remove(foundPassword);
+            //}
 
             _gens++;
 
