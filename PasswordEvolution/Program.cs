@@ -138,7 +138,10 @@ namespace PasswordEvolution
             {
                 Console.WriteLine("Validating seed model...");
                 var seedModel = _experiment.CreateGenomeDecoder().Decode(seed);
-                ValidateModel(seedModel, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+                lock (_experiment.Passwords)
+                {
+                    ValidateModel(seedModel, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+                }
             }
 
             // Create evolution algorithm using the seed model to initialize the population
@@ -148,7 +151,8 @@ namespace PasswordEvolution
             // Attach an update event handler. This will be called at the end of every generation
             // to log the progress of the evolution (see function logEvolutionProgress below).
             _ea.UpdateEvent += new EventHandler(logEvolutionProgress);
-
+            //_ea.UpdateScheme = new UpdateScheme(1);//.UpdateMode.
+            
             // Setup results file
             using (TextWriter writer = new StreamWriter(resultsFile))
                 writer.WriteLine("Generation,Champion Accounts,Champion Uniques,Average Accounts,Average Uniques,Total Accounts,Total Uniques");
@@ -164,7 +168,10 @@ namespace PasswordEvolution
             // Validate the resulting model.
             var decoder = _experiment.CreateGenomeDecoder();
             var champ = decoder.Decode(_ea.CurrentChampGenome);
-            ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            lock (_experiment.Passwords)
+            {
+                ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            }
         }
 
         static void ValidateModel(MarkovChain model, Dictionary<string, int> passwords, int guesses, bool hashed )
@@ -183,39 +190,59 @@ namespace PasswordEvolution
         /// </summary>
         static void logEvolutionProgress(object sender, EventArgs e)
         {
+           
             // Write the results to file.
             using (TextWriter writer = new StreamWriter(_generationalResultsFile, true))
             {
-                Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
-                                                         _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                         _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
-                                                         _experiment.Evaluator.FoundPasswords.Count);
-                //crackedPasswords = _experiment.Evaluator.FoundPasswords; 
+                lock (_experiment.Evaluator.FoundPasswords)
+                {
+                    Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
+                                                             _ea.CurrentChampGenome.EvaluationInfo.Fitness,
+                                                             _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                             _experiment.Evaluator.FoundPasswords.Count);
+                    //crackedPasswords = _experiment.Evaluator.FoundPasswords; 
+                }
 
                 lock (_experiment.Evaluator.FoundPasswords)
                 {
-                    Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
-                                                                _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                                _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
-                                                                _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
-                                                                _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
-                                                                _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
-                                                                _experiment.Evaluator.FoundPasswords.Count);
-                    writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
-                                                                 _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                                 _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
-                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
-                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
-                                                                 _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
-                                                                 _experiment.Evaluator.FoundPasswords.Count);
+                    lock (PasswordCrackingEvaluator.Passwords)
+                    {
+                        Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
+                                                                    _ea.CurrentChampGenome.EvaluationInfo.Fitness,
+                                                                    _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                                    _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
+                                                                    _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
+                                                                    _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
+                                                                    _experiment.Evaluator.FoundPasswords.Count);
+                        writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
+                                                                     _ea.CurrentChampGenome.EvaluationInfo.Fitness,
+                                                                     _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
+                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
+                                                                     _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
+                                                                     _experiment.Evaluator.FoundPasswords.Count);
+                    }
                     
                     /* Remove words from the dictionary at the end of the generation */
-                   
-                      /*  foreach (string p in _experiment.Evaluator.FoundPasswords)
+                    lock (PasswordCrackingEvaluator.Passwords)
+                    {
+                        foreach (string p in _experiment.Evaluator.FoundPasswords)
                         {
                             PasswordCrackingEvaluator.Passwords.Remove(p);
-                              _experiment.Passwords.Remove(p);
-                        }*/
+                            
+                        }
+                    }
+                    lock (_experiment.Evaluator.FoundPasswords)
+                    {
+                        foreach (string p in _experiment.Evaluator.FoundPasswords)
+                        {
+                            lock (PasswordCrackingEvaluator.Passwords)
+                            {
+                                PasswordCrackingEvaluator.Passwords.Remove(p);
+                            }
+
+                        }
+                    }
                     
                 }
                 Console.WriteLine("Done.");
@@ -237,6 +264,8 @@ namespace PasswordEvolution
             //}
 
             _gens++;
+
+            PasswordCrackingEvaluator.lockDictionary = false;
 
         }
 
