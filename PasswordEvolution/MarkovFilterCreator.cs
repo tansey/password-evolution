@@ -23,7 +23,7 @@ namespace PasswordEvolution
             return GenerateFirstOrderMarkovFilter(filename, passwords);
         }
 
-        public static int GenerateFirstOrderMarkovFilter(string filename, Dictionary<string, int> passwords)
+        public static int GenerateFirstOrderMarkovFilter(string filename, Dictionary<string, double> passwords)
         {
             Console.WriteLine("Creating First-Order Markov Filter");
             double[] fnFreqs = calculateFnFreqs(passwords);
@@ -87,7 +87,7 @@ namespace PasswordEvolution
             var passwords = PasswordUtil.LoadPasswords(corpus);
             return GenerateLayeredMarkovFilter(filename, passwords, layers);
         }
-        public static int GenerateLayeredMarkovFilter(string filename, Dictionary<string, int> passwords, int layers)
+        public static int GenerateLayeredMarkovFilter(string filename, Dictionary<string, double> passwords, int layers)
         {
             Console.WriteLine("Creating Nth-Order Markov Filter. Layers: {0}", layers);
             double[] fnFreqs = calculateFnFreqs(passwords);
@@ -168,7 +168,7 @@ namespace PasswordEvolution
             var passwords = PasswordUtil.LoadPasswords(corpus);
             return GenerateAdaptiveMarkovFilter(filename, passwords);
         }
-        public static int GenerateAdaptiveMarkovFilter(string filename, Dictionary<string, int> passwords)
+        public static int GenerateAdaptiveMarkovFilter(string filename, Dictionary<string, double> passwords)
         {
             Console.WriteLine("Creating True Markov Filter");
             double[] fnFreqs = calculateFnFreqs(passwords);
@@ -239,7 +239,7 @@ namespace PasswordEvolution
         /// Calculates the zeroth-order markov chain. That is, the probability of each
         /// character given the previous character.
         /// </summary>
-        static double[][] calculateTransitionFreqs(Dictionary<string, int> passwords)
+        static double[][] calculateTransitionFreqs(Dictionary<string, double> passwords)
         {
             double[][] freqs = new double[96][];
             for (int i = 0; i < 96; i++)
@@ -278,7 +278,7 @@ namespace PasswordEvolution
         /// Calculates the zeroth-order markov chain. That is, the probability of each
         /// character in the file.
         /// </summary>
-        static double[] calculateFnFreqs(Dictionary<string, int> passwords)
+        static double[] calculateFnFreqs(Dictionary<string, double> passwords)
         {
             double[] freqs = new double[95];
             for (int i = 0; i < freqs.Length; i++)
@@ -299,7 +299,7 @@ namespace PasswordEvolution
             return freqs;
         }
 
-        static double[, ,] calculateLayerFreqs(Dictionary<string, int> passwords, int layers)
+        static double[, ,] calculateLayerFreqs(Dictionary<string, double> passwords, int layers)
         {
             double[, ,] freqs = new double[layers, 95, 95];
 
@@ -340,7 +340,7 @@ namespace PasswordEvolution
             return freqs;
         }
 
-        static double[, ,] calculateAdaptiveFreqs(Dictionary<string, int> passwords)
+        static double[, ,] calculateAdaptiveFreqs(Dictionary<string, double> passwords)
         {
             // We need to figure out the largest possible password in the database
             int layers = passwords.Keys.Max(s => s.Length) + 1;

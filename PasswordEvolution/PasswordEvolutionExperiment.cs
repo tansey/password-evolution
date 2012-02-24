@@ -32,13 +32,13 @@ namespace PasswordEvolution
         ParallelOptions _parallelOptions;
         string[] _states;
         int _guesses;
-        Dictionary<string, int> _passwords;
+        Dictionary<string, double> _passwords;
         IActivationFunctionLibrary _activationFnLibrary;
         PasswordCrackingEvaluator _evaluator;
         int _outputs;
 
         #region Properties
-        public Dictionary<string, int> Passwords
+        public Dictionary<string, double> Passwords
         {
             get { return _passwords; }
             set { _passwords = value; }
@@ -269,7 +269,8 @@ namespace PasswordEvolution
             IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder = CreateGenomeDecoder();
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
+        //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
+            IGenomeListEvaluator<NeatGenome> innerEvaluator = new SerialGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
 
 
             // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes

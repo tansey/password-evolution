@@ -16,10 +16,10 @@ namespace PasswordEvolution
     {
         MD5 _md5;
         MD5Crypt _md5salt;
-        Dictionary<string, int> _passwords;
+        Dictionary<string, double> _passwords;
         List<string> _salts;
 
-        public MD5HashChecker(Dictionary<string, int> passwords)
+        public MD5HashChecker(Dictionary<string, double> passwords)
         {
             _passwords = passwords;
             _md5 = MD5.Create();
@@ -27,7 +27,7 @@ namespace PasswordEvolution
 
         public MD5HashChecker(string dbFilename, bool salted = false)
         {
-            _passwords = new Dictionary<string, int>();
+            _passwords = new Dictionary<string, double>();
             _md5 = MD5.Create();
             if (salted)
             {
@@ -54,7 +54,7 @@ namespace PasswordEvolution
                         _salts.Add(tokens.Last().Trim('"'));
                         pw = tokens[tokens.Length - 2].Trim('"');
                     }
-                    int val;
+                    double val;
                     if (!_passwords.TryGetValue(pw, out val))
                         _passwords.Add(pw, 0);
 
@@ -88,22 +88,22 @@ namespace PasswordEvolution
         /// </summary>
         /// <param name="pw">The password to guess.</param>
         /// <returns>The number of accounts that used the guessed password.</returns>
-        public int InDatabase(string pw)
+        public double InDatabase(string pw)
         {
             if (_salts == null)
             {
                 string hash = GetMd5Hash(pw);
-                int val;
+                double val;
                 if (_passwords.TryGetValue(hash, out val))
                     return val;
             }
             else
             {
-                int count = 0;
+                double count = 0;
                 foreach (string salt in _salts)
                 {
                     string hashsalt = _md5salt.crypt(pw, salt);
-                    int val;
+                    double val;
                     if (_passwords.TryGetValue(hashsalt, out val))
                         count += val;
                 }
