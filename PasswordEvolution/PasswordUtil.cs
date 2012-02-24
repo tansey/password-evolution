@@ -11,9 +11,9 @@ namespace PasswordEvolution
     /// </summary>
     public static class PasswordUtil
     {
-        public static Dictionary<string, int> LoadPasswords(string pwdfile, int? length = null)
+        public static Dictionary<string, double> LoadPasswords(string pwdfile, double? length = null)
         {
-            var passwords = new Dictionary<string, int>();
+            var passwords = new Dictionary<string, double>();
             ulong best = 0;
             int[] countsHistogram = new int[20];
             using (TextReader reader = new StreamReader(pwdfile))
@@ -75,7 +75,7 @@ namespace PasswordEvolution
         /// <summary>
         /// Prints summary statistics for a database of passwords.
         /// </summary>
-        public static void PrintStats(Dictionary<string, int> passwords)
+        public static void PrintStats(Dictionary<string, double> passwords)
         {
             int total = passwords.Count;
             int lowercase = 0;

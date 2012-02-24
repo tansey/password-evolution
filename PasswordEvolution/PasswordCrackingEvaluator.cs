@@ -16,11 +16,13 @@ namespace PasswordEvolution
     /// </summary>
     public class PasswordCrackingEvaluator : IPhenomeEvaluator<MarkovChain>
     {
-        public static Dictionary<string, int> Passwords;
+        public static Dictionary<string, double> Passwords;
         MD5HashChecker _md5;
         int _guesses;
         ulong _evalCount;
         bool isOptimal;
+
+        public static bool lockDictionary;
 
         public PasswordCrackingEvaluator(int guessesPerIndividual, bool hashed = false)
         {
@@ -80,7 +82,7 @@ namespace PasswordEvolution
                 if (guessed.Contains(guess))
                     continue;
 
-                int count;
+                double count;
                 // If the database is hashed, then we need to hash the guess.
                 if (_md5 != null)
                     lock (_md5)
@@ -111,6 +113,8 @@ namespace PasswordEvolution
 
             _evalCount++;
 
+            lockDictionary = true;
+
             // Return the fitness as the number of accounts cracked. The alternative
             // fitness is the unique accounts cracked. You can try switching
             // these two around to see which gets better performance.
@@ -138,7 +142,7 @@ namespace PasswordEvolution
                 if (found.Contains(guess))
                     continue;
 
-                int count;
+                double count;
                 if (_md5 != null)
                     count = _md5.InDatabase(guess);
                 else
@@ -165,7 +169,7 @@ namespace PasswordEvolution
         /// <param name="interval">The frequency with which to write progress to file.</param>
         /// <param name="passwordLength">The length of passwords to try cracking.</param>
         /// <returns></returns>
-        public FitnessInfo Validate(MarkovChain model, Dictionary<string, int> db, string logfile, int interval, int passwordLength = 8)
+        public FitnessInfo Validate(MarkovChain model, Dictionary<string, double> db, string logfile, int interval, int passwordLength = 8)
         {
             double score = 0;
             int uniques = 0;
@@ -186,7 +190,7 @@ namespace PasswordEvolution
                     if (found.Contains(guess))
                         continue;
 
-                    int count;
+                    double count;
                     if (_md5 != null)
                         count = _md5.InDatabase(guess);
                     else

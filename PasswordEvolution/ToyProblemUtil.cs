@@ -82,9 +82,9 @@ namespace PasswordEvolution
                         writer.WriteLine(kv.Key);
         }
 
-        static Dictionary<string, int> morphEnglish(Dictionary<string, int> english, double[] digitProbs, double[] posProbs, int minLength = 0)
+        static Dictionary<string, double> morphEnglish(Dictionary<string, double> english, double[] digitProbs, double[] posProbs, int minLength = 0)
         {
-            Dictionary<string, int> results = new Dictionary<string, int>();
+            Dictionary<string, double> results = new Dictionary<string, double>();
 
             FastRandom random = new FastRandom();
             
@@ -121,7 +121,7 @@ namespace PasswordEvolution
                     }
                     numbered = true;
                 }
-                int val;
+                double val;
                 if (!results.TryGetValue(morphedPassword, out val))
                     results.Add(morphedPassword, 1);
             }
