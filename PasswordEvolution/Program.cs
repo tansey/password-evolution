@@ -138,10 +138,7 @@ namespace PasswordEvolution
             {
                 Console.WriteLine("Validating seed model...");
                 var seedModel = _experiment.CreateGenomeDecoder().Decode(seed);
-                lock (_experiment.Passwords)
-                {
-                    ValidateModel(seedModel, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
-                }
+                ValidateModel(seedModel, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
             }
 
             // Create evolution algorithm using the seed model to initialize the population
@@ -174,7 +171,7 @@ namespace PasswordEvolution
             }
         }
 
-        static void ValidateModel(MarkovChain model, Dictionary<string, int> passwords, int guesses, bool hashed )
+        static void ValidateModel(MarkovChain model, Dictionary<string, double> passwords, int guesses, bool hashed )
         {
             Console.Write("Validating on {0} guesses... ", guesses);
             PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(guesses, hashed);
@@ -223,27 +220,6 @@ namespace PasswordEvolution
                                                                      _experiment.Evaluator.FoundPasswords.Count);
                     }
                     
-                    /* Remove words from the dictionary at the end of the generation */
-                    lock (PasswordCrackingEvaluator.Passwords)
-                    {
-                        foreach (string p in _experiment.Evaluator.FoundPasswords)
-                        {
-                            PasswordCrackingEvaluator.Passwords.Remove(p);
-                            
-                        }
-                    }
-                    lock (_experiment.Evaluator.FoundPasswords)
-                    {
-                        foreach (string p in _experiment.Evaluator.FoundPasswords)
-                        {
-                            lock (PasswordCrackingEvaluator.Passwords)
-                            {
-                                PasswordCrackingEvaluator.Passwords.Remove(p);
-                            }
-
-                        }
-                    }
-                    
                 }
                 Console.WriteLine("Done.");
             }
@@ -257,11 +233,8 @@ namespace PasswordEvolution
             if (_gens >= MAX_GENERATIONS)
                 _ea.Stop();
 
-            //foreach (String foundPassword in crackedPasswords)
-            //{
-            //    Console.WriteLine("Removing: {0}", foundPassword);
-            //    PasswordCrackingEvaluator.Passwords.Remove(foundPassword);
-            //}
+          
+
 
             _gens++;
 
@@ -272,7 +245,7 @@ namespace PasswordEvolution
         #region Code to run the static model comparison of first-order vs. layered
         // TODO: Clean up and refactor this entire section.
 
-        static Dictionary<string, int>[] _passwords;
+        static Dictionary<string, double>[] _passwords;
         static PasswordDatasetInfo[] _datasetFilenames;
         static object _writerLock = new object();
 
@@ -292,7 +265,7 @@ namespace PasswordEvolution
             };
 
             Console.WriteLine("Loading all {0} password datasets...", _datasetFilenames.Length);
-            _passwords = new Dictionary<string, int>[_datasetFilenames.Length];
+            _passwords = new Dictionary<string, double>[_datasetFilenames.Length];
             for (int i = 0; i < _passwords.Length; i++)
             {
                 Console.WriteLine(_datasetFilenames[i].Name);
@@ -351,7 +324,8 @@ namespace PasswordEvolution
                         Console.Write("Validating {0} {1} model on {2} with {3} guesses... ", models[m], _datasetFilenames[i].Name, _datasetFilenames[j].Name, VALIDATION_GUESSES);
                         PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(VALIDATION_GUESSES, false);
                         var results = eval.Validate(model, _passwords[j], EXPERIMENT_OFFSET + models[m] + "-" + _datasetFilenames[i].Name + "-" + _datasetFilenames[j].Name + ".csv", 10000);
-                        Console.WriteLine("Accounts: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
+                       // Console.WriteLine("Accounts: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
+                        Console.WriteLine("Total Score: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
 
                         lock(_writerLock)
                             using (TextWriter writer = new StreamWriter(@"..\..\..\experiments\summary_results.csv", true))
