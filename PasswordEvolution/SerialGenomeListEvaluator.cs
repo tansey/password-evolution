@@ -18,6 +18,8 @@
  */
 using System.Collections.Generic;
 using SharpNeat.Core;
+using SharpNeat.Genomes.Neat;
+using SharpNeatMarkovModels;
 //using PasswordEvolution;
 //using namespace SharpNeat.Core;
 namespace PasswordEvolution
@@ -34,16 +36,16 @@ namespace PasswordEvolution
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
-        readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
-        readonly IPhenomeEvaluator<TPhenome> _phenomeEvaluator;
+        readonly IGenomeDecoder<NeatGenome, MarkovChain> _genomeDecoder;
+        readonly PasswordCrackingEvaluator _passwordCrackingEvaluator;
         
        
         readonly EvaluationMethod _evalMethod;
-        public HashSet<string> FoundPasswords { get; set; }
-        int _guesses;
-        MD5HashChecker _md5;
+       // public HashSet<string> FoundPasswords { get; set; }
+        //int _guesses;
+       // MD5HashChecker _md5;
 
-        delegate void EvaluationMethod(IList<TGenome> genomeList);
+        delegate void EvaluationMethod(IList<NeatGenome> genomeList);
 
         #region Constructors
 
@@ -52,29 +54,22 @@ namespace PasswordEvolution
         /// Phenome caching is enabled by default.
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-       /* public SerialGenomeListEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-                                           IPhenomeEvaluator<TPhenome> phenomeEvaluator)
-            : this(genomeDecoder, phenomeEvaluator, true)
+        public SerialGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
+                                           PasswordCrackingEvaluator passwordCrackingEvaluator)
+            : this(genomeDecoder, passwordCrackingEvaluator, true)
         {
-        }*/
+        }
 
     
 
         /// <summary>
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
-        public SerialGenomeListEvaluator(IGenomeDecoder<TGenome, TPhenome> genomeDecoder,
-                                           IPhenomeEvaluator<TPhenome> phenomeEvaluator,
-                                          int guessesPerIndividual, bool hashed = false)
+        public SerialGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
+                                           PasswordCrackingEvaluator passwordCrackingEvaluator, bool hashed = false)
         {
             _genomeDecoder = genomeDecoder;
-            _phenomeEvaluator = phenomeEvaluator;
-
-
-            _guesses = guessesPerIndividual;
-            FoundPasswords = new HashSet<string>();
-            if (hashed)
-                _md5 = new MD5HashChecker(Passwords);
+            _passwordCrackingEvaluator = passwordCrackingEvaluator;
 
             _evalMethod = Evaluate_Serial;
             // Determine the appropriate evaluation method.
@@ -90,7 +85,7 @@ namespace PasswordEvolution
         /// </summary>
         public ulong EvaluationCount
         {
-            get { return _phenomeEvaluator.EvaluationCount; }
+            get { return _passwordCrackingEvaluator.EvaluationCount; }
         }
 
         /// <summary>
@@ -100,7 +95,7 @@ namespace PasswordEvolution
         /// </summary>
         public bool StopConditionSatisfied
         {
-            get { return _phenomeEvaluator.StopConditionSatisfied; }
+            get { return _passwordCrackingEvaluator.StopConditionSatisfied; }
         }
 
         /// <summary>
@@ -108,7 +103,7 @@ namespace PasswordEvolution
         /// </summary>
         public void Reset()
         {
-            _phenomeEvaluator.Reset();
+            _passwordCrackingEvaluator.Reset();
         }
 
         /// <summary>
@@ -117,7 +112,7 @@ namespace PasswordEvolution
         /// </summary>
         public void Evaluate(IList<TGenome> genomeList)
         {
-            _evalMethod(genomeList);
+            _evalMethod((IList<NeatGenome>)genomeList);
         }
 
         #endregion
@@ -127,13 +122,13 @@ namespace PasswordEvolution
         /// <summary>
         /// Main genome evaluation loop with no phenome caching (decode on each loop).
         /// </summary>
-        private void Evaluate_Serial(IList<TGenome> genomeList)
+        private void Evaluate_Serial(IList<NeatGenome> genomeList)
         {
             // Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
             //   {
-            foreach (TGenome genome in genomeList)
+            foreach (NeatGenome genome in genomeList)
             {
-                TPhenome phenome = _genomeDecoder.Decode(genome);
+                MarkovChain phenome = _genomeDecoder.Decode(genome);
                 if (null == phenome)
                 {   // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
@@ -141,17 +136,18 @@ namespace PasswordEvolution
                 }
                 else
                 {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
+                    FitnessInfo fitnessInfo = _passwordCrackingEvaluator.Evaluate(phenome);
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AlternativeFitness = fitnessInfo._alternativeFitness;
                 }
 
             }
- 
-            foreach (string p in _phenomeEvaluator.FoundPasswords)
-            {
-                PasswordCrackingEvaluator.Passwords.Remove(p);
 
+            foreach (string p in _passwordCrackingEvaluator.FoundPasswords)
+            {
+                //PasswordCrackingEvaluator.Passwords.Remove(p);
+                double val = PasswordCrackingEvaluator.Passwords[p];
+                PasswordCrackingEvaluator.Passwords[p] = val * 0.75;
             }
         }
 
