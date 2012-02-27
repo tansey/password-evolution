@@ -17,12 +17,13 @@ namespace PasswordEvolution
     public class PasswordCrackingEvaluator : IPhenomeEvaluator<MarkovChain>
     {
         public static Dictionary<string, double> Passwords;
+        //
+        public static Dictionary<string, double> PasswordsWithAccounts;
+        //
         MD5HashChecker _md5;
         int _guesses;
         ulong _evalCount;
         bool isOptimal;
-
-        public static bool lockDictionary;
 
         public PasswordCrackingEvaluator(int guessesPerIndividual, bool hashed = false)
         {
@@ -89,7 +90,10 @@ namespace PasswordEvolution
                         count = _md5.InDatabase(guess);
                 // If it's plaintext, we can simply look it up in the dictionary.
                 else
+                {
                     Passwords.TryGetValue(guess, out count);
+                   // PasswordsWithAccounts.TryGetValue(guess, out count);
+                }
 
                 // If the password was in the dictionary, then this model guessed
                 // it correctly.
@@ -112,8 +116,6 @@ namespace PasswordEvolution
             }
 
             _evalCount++;
-
-            lockDictionary = true;
 
             // Return the fitness as the number of accounts cracked. The alternative
             // fitness is the unique accounts cracked. You can try switching
@@ -146,7 +148,8 @@ namespace PasswordEvolution
                 if (_md5 != null)
                     count = _md5.InDatabase(guess);
                 else
-                    Passwords.TryGetValue(guess, out count);
+                    //Passwords.TryGetValue(guess, out count);
+                    PasswordsWithAccounts.TryGetValue(guess, out count);
 
                 if (count > 0)
                 {

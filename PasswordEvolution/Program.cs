@@ -43,12 +43,9 @@ namespace PasswordEvolution
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
+   //     const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
         const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
-
-        ////
-        //static HashSet<string> crackedPasswords;
-        ////
 
 
         static void Main(string[] args)
@@ -124,9 +121,9 @@ namespace PasswordEvolution
             // Set the passwords to be used by the fitness evaluator.
             // These are the passwords our models will try to guess.
             PasswordCrackingEvaluator.Passwords = _experiment.Passwords;
-            //// 
-            //Console.WriteLine("Password Dictionary Size: {0}", _experiment.Passwords.Count);
-            ////
+            // Janek's addition so that we can keep track of actual accounts guessed even after decaying the points in the Passwords Dictionary.
+            PasswordCrackingEvaluator.PasswordsWithAccounts = new Dictionary<string,double>(_experiment.Passwords); // Makes a deep copy.
+            //
 
             Console.WriteLine("Loading seed...");
             
@@ -165,13 +162,10 @@ namespace PasswordEvolution
             // Validate the resulting model.
             var decoder = _experiment.CreateGenomeDecoder();
             var champ = decoder.Decode(_ea.CurrentChampGenome);
-            lock (_experiment.Passwords)
-            {
-                ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
-            }
+            ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
         }
 
-        static void ValidateModel(MarkovChain model, Dictionary<string, double> passwords, int guesses, bool hashed )
+        static void ValidateModel(MarkovChain model, Dictionary<string, double> passwords, int guesses, bool hashed ) //passwords here is not used...
         {
             Console.Write("Validating on {0} guesses... ", guesses);
             PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(guesses, hashed);
@@ -191,35 +185,27 @@ namespace PasswordEvolution
             // Write the results to file.
             using (TextWriter writer = new StreamWriter(_generationalResultsFile, true))
             {
-                lock (_experiment.Evaluator.FoundPasswords)
-                {
-                    Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
-                                                             _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                             _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
-                                                             _experiment.Evaluator.FoundPasswords.Count);
-                    //crackedPasswords = _experiment.Evaluator.FoundPasswords; 
-                }
+                Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
+                                                            _ea.CurrentChampGenome.EvaluationInfo.Fitness,
+                                                            _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                            _experiment.Evaluator.FoundPasswords.Count);
 
                 lock (_experiment.Evaluator.FoundPasswords)
                 {
-                    lock (PasswordCrackingEvaluator.Passwords)
-                    {
-                        Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
+                    Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
+                                                                _ea.CurrentChampGenome.EvaluationInfo.Fitness,
+                                                                _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                                _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
+                                                                _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
+                                                                _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
+                                                                _experiment.Evaluator.FoundPasswords.Count);
+                    writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
                                                                     _ea.CurrentChampGenome.EvaluationInfo.Fitness,
                                                                     _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
                                                                     _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
                                                                     _experiment.Evaluator.FoundPasswords.Count);
-                        writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
-                                                                     _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                                     _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
-                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
-                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
-                                                                     _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
-                                                                     _experiment.Evaluator.FoundPasswords.Count);
-                    }
-                    
                 }
                 Console.WriteLine("Done.");
             }
@@ -233,13 +219,7 @@ namespace PasswordEvolution
             if (_gens >= MAX_GENERATIONS)
                 _ea.Stop();
 
-          
-
-
             _gens++;
-
-            PasswordCrackingEvaluator.lockDictionary = false;
-
         }
 
         #region Code to run the static model comparison of first-order vs. layered
