@@ -39,11 +39,7 @@ namespace PasswordEvolution
         readonly IGenomeDecoder<NeatGenome, MarkovChain> _genomeDecoder;
         readonly PasswordCrackingEvaluator _passwordCrackingEvaluator;
         
-       
         readonly EvaluationMethod _evalMethod;
-       // public HashSet<string> FoundPasswords { get; set; }
-        //int _guesses;
-       // MD5HashChecker _md5;
 
         delegate void EvaluationMethod(IList<NeatGenome> genomeList);
 
@@ -124,8 +120,6 @@ namespace PasswordEvolution
         /// </summary>
         private void Evaluate_Serial(IList<NeatGenome> genomeList)
         {
-            // Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
-            //   {
             foreach (NeatGenome genome in genomeList)
             {
                 MarkovChain phenome = _genomeDecoder.Decode(genome);
@@ -150,35 +144,6 @@ namespace PasswordEvolution
                 PasswordCrackingEvaluator.Passwords[p] = val * 0.75;
             }
         }
-
-        /// <summary>
-        /// Main genome evaluation loop with phenome caching (decode only if no cached phenome is present
-        /// from a previous decode).
-        /// </summary>
-       /* private void Evaluate_Caching(IList<TGenome> genomeList)
-        {
-            Parallel.ForEach(genomeList, _parallelOptions, delegate(TGenome genome)
-            {
-                TPhenome phenome = (TPhenome)genome.CachedPhenome;
-                if (null == phenome)
-                {   // Decode the phenome and store a ref against the genome.
-                    phenome = _genomeDecoder.Decode(genome);
-                    genome.CachedPhenome = phenome;
-                }
-
-                if (null == phenome)
-                {   // Non-viable genome.
-                    genome.EvaluationInfo.SetFitness(0.0);
-                    genome.EvaluationInfo.AlternativeFitness = 0.0;
-                }
-                else
-                {
-                    FitnessInfo fitnessInfo = _phenomeEvaluator.Evaluate(phenome);
-                    genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
-                    genome.EvaluationInfo.AlternativeFitness = fitnessInfo._alternativeFitness;
-                }
-            });
-        }*/
 
         #endregion
     }
