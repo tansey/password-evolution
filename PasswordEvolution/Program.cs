@@ -38,13 +38,16 @@ namespace PasswordEvolution
         const string HASHED_PASSWORDS_FILE = @"..\..\..\passwords\battlefield_heroes.txt";
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
-        const int VALIDATION_GUESSES = 10000;// = 1000000000;
-        const int MAX_GENERATIONS = 10;//= 200;
+        const int VALIDATION_GUESSES = 1000000000; // config.xml
+     //   const int VALIDATION_GUESSES = 10000; // mini-project.config.xml
+
+        const int MAX_GENERATIONS = 200; // Original
+   //     const int MAX_GENERATIONS = 10; // For short tests;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
-   //     const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
-        const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
+        const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
+   //     const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
 
 
