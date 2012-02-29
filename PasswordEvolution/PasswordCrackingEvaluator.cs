@@ -155,6 +155,9 @@ namespace PasswordEvolution
                 {
                     score += count;
                     uniques++;
+                    //
+                    //Console.WriteLine("Password found: {0}", guess);
+                    //
                     found.Add(guess);
                 }
             }
