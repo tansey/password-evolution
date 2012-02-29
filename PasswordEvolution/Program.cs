@@ -43,9 +43,9 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 1000000000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 1000000; // mini-project.config.xml
 
-        const int MAX_GENERATIONS = 200;
+        const int MAX_GENERATIONS = 10;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
@@ -53,10 +53,7 @@ namespace PasswordEvolution
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
 
         // For the toyDistributionSet
-        const string TOY_DISTRIBUTION_DATASET = @"..\..\..\passwords\toyDistributionSet.txt";
         const string TOY_DISTRIBUTION_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
-        const string TOY_DISTRIBUTION_RESULTS_FILE = @"..\..\..\experiments\toy-distribution_results.csv";
-
 
         static void Main(string[] args)
         {
@@ -81,7 +78,7 @@ namespace PasswordEvolution
             //RunExperiment(PHPBB_DATASET, PHPBB_SEED_FILE, PHPBB_CONFIG_FILE, PHPBB_RESULTS_FILE, false);
 
             //Train on the toyDistribution dataset and evolve against the toyDistribution dataset
-            RunExperiment(TOY_DISTRIBUTION_DATASET, SEED_FILE, TOY_DISTRIBUTION_CONFIG_FILE, TOY_DISTRIBUTION_RESULTS_FILE, false);
+            RunExperiment(TOY_DISTRIBUTION_CONFIG_FILE, false);
 
             // Print some summary statistics about the distribution of passwords in the two morphed english dictionaries.
             // PasswordUtil.PrintStats(@"..\..\..\passwords\morphed_english.txt"); // no creation rules
@@ -106,24 +103,27 @@ namespace PasswordEvolution
         /// <param name="configFile">The file containing all the configuration parameters of the evolution.</param>
         /// <param name="resultsFile">The file to which the results will be saved at each generation.</param>
         /// <param name="validateSeed">If true, the seed model will first be validated against a large number of guesses.</param>
-        private static void RunExperiment(string trainingSetFile, string seedFile, string configFile, string resultsFile, bool validateSeed = false)
+        //private static void RunExperiment(string trainingSetFile, string seedFile, string configFile, string resultsFile, bool validateSeed = false)
+        private static void RunExperiment(string configFile, bool validateSeed = false)
         {
             Console.Write("Building Markov model...");
             
-            // Here I am making it so that we specify all files in the xml config file. This way we don't have to search multiple places. Not done yet...
-            /*
             // Load the XML configuration file
             XmlDocument xmlConfig = new XmlDocument();
             xmlConfig.Load(configFile);
             XmlElement xmlConfigElement = xmlConfig.DocumentElement;
-            // Load the training set passwords from file
-            string pwdfile = XmlUtils.GetValueAsString(xmlConfigElement, "TrainingFile");
-            var passwords = PasswordUtil.LoadPasswords(pwdfile, 8);
-            // Create a Markov model from the passwords. This model will be used
-            // as our seed for the evolution.
+
+            // Set Training File
+            string trainingSetFile = XmlUtils.GetValueAsString(xmlConfigElement, "TrainingFile");
+
+            // Create seedFile
             string seedFile = XmlUtils.GetValueAsString(xmlConfigElement, "SeedFile");
-            int outputs = MarkovFilterCreator.GenerateFirstOrderMarkovFilter(seedFile, passwords);
-            */
+
+            // Create results file.
+            string resultsFile = XmlUtils.GetValueAsString(xmlConfigElement, "ResultsFile");
+
+            Console.WriteLine("\nTraining File: {0}\nSeed File: {1}\nResults File: {2}", trainingSetFile, seedFile, resultsFile);
+            
 
             // Load the training set passwords from file
             var passwords = PasswordUtil.LoadPasswords(trainingSetFile, 8); 
@@ -140,17 +140,14 @@ namespace PasswordEvolution
             _experiment = new PasswordEvolutionExperiment();
             _experiment.OutputCount = outputs;
             
-            // Load the XML configuration file
-            XmlDocument xmlConfig = new XmlDocument();
-            xmlConfig.Load(configFile);
+            // Initialize the experiment with the specifications in the config file.
             _experiment.Initialize("PasswordEvolution", xmlConfig.DocumentElement);
 
             // Set the passwords to be used by the fitness evaluator.
             // These are the passwords our models will try to guess.
+            // PasswordsWithAccounts is the file used for validation. Its account values won't be changed.
             PasswordCrackingEvaluator.Passwords = _experiment.Passwords;
-            // Janek's addition so that we can keep track of actual accounts guessed even after decaying the points in the Passwords Dictionary.
-            PasswordCrackingEvaluator.PasswordsWithAccounts = new Dictionary<string,double>(_experiment.Passwords); // Makes a deep copy.
-            //
+            PasswordCrackingEvaluator.PasswordsWithAccounts = new Dictionary<string,double>(_experiment.Passwords); // Makes a deep copy
 
             Console.WriteLine("Loading seed...");
             
@@ -208,13 +205,12 @@ namespace PasswordEvolution
         /// </summary>
         static void logEvolutionProgress(object sender, EventArgs e)
         {
-           
+            var maxFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.Fitness);
+            var maxAltFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
+            var genChampion = _ea.GenomeList.First(g => g.EvaluationInfo.Fitness == maxFitness);
             // Write the results to file.
             using (TextWriter writer = new StreamWriter(_generationalResultsFile, true))
             {
-                var maxFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.Fitness);
-                var maxAltFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
-                var genChampion = _ea.GenomeList.First(g => g.EvaluationInfo.Fitness == maxFitness);
                 Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
                                                             maxFitness,
                                                             maxAltFitness,

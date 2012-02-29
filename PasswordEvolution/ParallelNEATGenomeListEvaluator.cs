@@ -12,7 +12,7 @@ namespace PasswordEvolution
     /// Genome decoding is performed by a provided IGenomeDecoder.
     /// Phenome evaluation is performed by a provided IPhenomeEvaluator.
     /// </summary>
-    public class SerialGenomeListEvaluator<TGenome, TPhenome> : IGenomeListEvaluator<TGenome>
+    public class ParallelNEATGenomeListEvaluator<TGenome, TPhenome> : IGenomeListEvaluator<TGenome>
         where TGenome : class, IGenome<TGenome>
         where TPhenome : class
     {
@@ -28,7 +28,7 @@ namespace PasswordEvolution
         /// Phenome caching is enabled by default.
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
-        public SerialGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
+        public ParallelNEATGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
                                            PasswordCrackingEvaluator passwordCrackingEvaluator)
             : this(genomeDecoder, passwordCrackingEvaluator, true)
         {
@@ -39,7 +39,7 @@ namespace PasswordEvolution
         /// <summary>
         /// Construct with the provided IGenomeDecoder, IPhenomeEvaluator, ParalleOptions and enablePhenomeCaching flag.
         /// </summary>
-        public SerialGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
+        public ParallelNEATGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
                                            PasswordCrackingEvaluator passwordCrackingEvaluator, bool hashed = false)
         {
             _genomeDecoder = genomeDecoder;

@@ -90,10 +90,7 @@ namespace PasswordEvolution
                         count = _md5.InDatabase(guess);
                 // If it's plaintext, we can simply look it up in the dictionary.
                 else
-                {
                     Passwords.TryGetValue(guess, out count);
-                   // PasswordsWithAccounts.TryGetValue(guess, out count);
-                }
 
                 // If the password was in the dictionary, then this model guessed
                 // it correctly.
