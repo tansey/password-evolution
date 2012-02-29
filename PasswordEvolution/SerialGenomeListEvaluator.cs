@@ -22,6 +22,7 @@ using SharpNeat.Genomes.Neat;
 using SharpNeatMarkovModels;
 //using PasswordEvolution;
 //using namespace SharpNeat.Core;
+using System.Threading.Tasks;
 namespace PasswordEvolution
 //namespace SharpNeat.Core
 {
@@ -120,9 +121,17 @@ namespace PasswordEvolution
         /// </summary>
         private void Evaluate_Serial(IList<NeatGenome> genomeList)
         {
-            foreach (NeatGenome genome in genomeList)
+           
+            Parallel.ForEach(genomeList,  delegate(NeatGenome genome)
             {
+                ///TPhenome phenome = (TPhenome)genome.CachedPhenome;
                 MarkovChain phenome = _genomeDecoder.Decode(genome);
+                if (null == phenome)
+                {
+                    genome.EvaluationInfo.SetFitness(0.0);
+                    genome.EvaluationInfo.AlternativeFitness = 0.0;
+                }
+
                 if (null == phenome)
                 {   // Non-viable genome.
                     genome.EvaluationInfo.SetFitness(0.0);
@@ -134,8 +143,8 @@ namespace PasswordEvolution
                     genome.EvaluationInfo.SetFitness(fitnessInfo._fitness);
                     genome.EvaluationInfo.AlternativeFitness = fitnessInfo._alternativeFitness;
                 }
+            });
 
-            }
 
             foreach (string p in _passwordCrackingEvaluator.FoundPasswords)
             {
