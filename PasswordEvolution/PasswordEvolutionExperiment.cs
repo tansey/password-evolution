@@ -131,8 +131,9 @@ namespace PasswordEvolution
             ValidationGuesses = XmlUtils.GetValueAsInt(xmlConfig, "ValidationGuesses");
 
             // Load the passwords from file
-            Console.Write("Loading passwords...");
-            string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "PasswordFile");
+       //     Console.Write("Loading passwords...");
+            string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "ValidationPasswordFile");
+            Console.Write("Loading passwords from [{0}]...", pwdfile);
             if (_passwords == null || _passwords.Count == 0)
             {
                 int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
@@ -270,7 +271,7 @@ namespace PasswordEvolution
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
         //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
-            IGenomeListEvaluator<NeatGenome> innerEvaluator = new SerialGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
+            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
 
 
             // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes

@@ -14,12 +14,13 @@
  
     Fitness is the number of passwords cracked by the individual.
   </Description>
-  <Guesses>10000000</Guesses>
+  <Guesses>10000</Guesses>
   <Hashed>False</Hashed>
-  <ValidationGuesses>1000000000</ValidationGuesses>
-  <PasswordFile>..\..\..\passwords\toyDistributionSet.txt</PasswordFile>
-  <!--
+  <ValidationGuesses>1000000</ValidationGuesses>
+  <ValidationPasswordFile>..\..\..\passwords\toyDistributionSet.txt</ValidationPasswordFile>
+ 
   <TrainingFile>..\..\..\passwords\toyDistributionSet.txt</TrainingFile>
   <SeedFile>..\..\..\experiments\seed.xml</SeedFile>
-  -->
+  <ResultsFile>..\..\..\experiments\toy-distribution_results.csv</ResultsFile>
+  
 </Config>
