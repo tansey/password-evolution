@@ -14,8 +14,8 @@
  
     Fitness is the number of passwords cracked by the individual.
   </Description>
-  <Guesses>10000</Guesses>
+  <Guesses>100000</Guesses>
   <Hashed>False</Hashed>
-  <ValidationGuesses>10000</ValidationGuesses>
-  <PasswordFile>..\..\..\passwords\rockyou-withcount.txt</PasswordFile>
+  <ValidationGuesses>10000000</ValidationGuesses>
+  <PasswordFile>..\..\..\passwords\toyDistributionSet.txt</PasswordFile>
 </Config>

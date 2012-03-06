@@ -19,6 +19,7 @@ namespace PasswordEvolution
     {
         static PasswordEvolutionExperiment _experiment;
         static NeatEvolutionAlgorithm<NeatGenome> _ea;
+        const string CHAMPION_FILE_ROOT = @"..\..\..\experiments\champions\champion"; // To be used: append ("gen_{0}.xml", _gens)
         const string CHAMPION_FILE = @"..\..\..\experiments\champion.xml";
         const string CONFIG_FILE = @"..\..\..\experiments\config.xml";
         const string SEED_FILE = @"..\..\..\experiments\seed.xml";
@@ -38,17 +39,23 @@ namespace PasswordEvolution
         const string HASHED_PASSWORDS_FILE = @"..\..\..\passwords\battlefield_heroes.txt";
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
-        const int VALIDATION_GUESSES = 1000000000; // config.xml
-     //   const int VALIDATION_GUESSES = 10000; // mini-project.config.xml
+        //const int VALIDATION_GUESSES = 1000000000; // config.xml
+        const int VALIDATION_GUESSES = 10000000; // mini-project.config.xml
 
-        const int MAX_GENERATIONS = 200; // Original
-   //     const int MAX_GENERATIONS = 10; // For short tests;
+        //const int MAX_GENERATIONS = 200; // Original
+        const int MAX_GENERATIONS = 10; // For short tests;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
         const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
    //     const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
+
+        // For the toyDistributionSet
+        const string TOY_DISTRIBUTION_DATASET = @"..\..\..\passwords\toyDistributionSet.txt";
+        //const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
+        const string TOY_DISTRIBUTION_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
+        const string TOY_DISTRIBUTION_RESULTS_FILE = @"..\..\..\experiments\toy-distribution_results.csv";
 
 
         static void Main(string[] args)
@@ -71,8 +78,10 @@ namespace PasswordEvolution
 
 
             //Train on the phppb dataset and evolve against the rockyou dataset
-            RunExperiment(PHPBB_DATASET, PHPBB_SEED_FILE, PHPBB_CONFIG_FILE, PHPBB_RESULTS_FILE, false);
+            //RunExperiment(PHPBB_DATASET, PHPBB_SEED_FILE, PHPBB_CONFIG_FILE, PHPBB_RESULTS_FILE, false);
 
+            //Train on the toyDistribution dataset and evolve against the toyDistribution dataset
+            RunExperiment(TOY_DISTRIBUTION_DATASET, SEED_FILE, TOY_DISTRIBUTION_CONFIG_FILE, TOY_DISTRIBUTION_RESULTS_FILE, false);
 
             // Print some summary statistics about the distribution of passwords in the two morphed english dictionaries.
             // PasswordUtil.PrintStats(@"..\..\..\passwords\morphed_english.txt"); // no creation rules
@@ -215,7 +224,7 @@ namespace PasswordEvolution
           
             // Save the best genome to file
             var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { _ea.CurrentChampGenome }, true);
-            doc.Save(CHAMPION_FILE);
+            doc.Save(CHAMPION_FILE_ROOT + "_gen_" + _gens + ".xml");
 
             // If we've reached the maximum number of generations,
             // tell the algorithm to stop.
