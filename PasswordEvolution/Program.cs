@@ -12,6 +12,9 @@ using SharpNeat.Utility;
 using SharpNeat.Core;
 using SharpNeatMarkovModels;
 using System.Threading.Tasks;
+//
+using SharpNeat.Domains;
+//
 
 namespace PasswordEvolution
 {
@@ -40,20 +43,17 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 10000000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 1000000000; // mini-project.config.xml
 
-        //const int MAX_GENERATIONS = 200; // Original
-        const int MAX_GENERATIONS = 10; // For short tests;
+        const int MAX_GENERATIONS = 200;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
-        const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
-   //     const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
+        const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string PHPBB_RESULTS_FILE = @"..\..\..\experiments\phpbb_results.csv";
 
         // For the toyDistributionSet
         const string TOY_DISTRIBUTION_DATASET = @"..\..\..\passwords\toyDistributionSet.txt";
-        //const string PHPBB_CONFIG_FILE = @"..\..\..\experiments\config.xml";
         const string TOY_DISTRIBUTION_CONFIG_FILE = @"..\..\..\experiments\mini-project.config.xml";
         const string TOY_DISTRIBUTION_RESULTS_FILE = @"..\..\..\experiments\toy-distribution_results.csv";
 
@@ -110,6 +110,21 @@ namespace PasswordEvolution
         {
             Console.Write("Building Markov model...");
             
+            // Here I am making it so that we specify all files in the xml config file. This way we don't have to search multiple places. Not done yet...
+            /*
+            // Load the XML configuration file
+            XmlDocument xmlConfig = new XmlDocument();
+            xmlConfig.Load(configFile);
+            XmlElement xmlConfigElement = xmlConfig.DocumentElement;
+            // Load the training set passwords from file
+            string pwdfile = XmlUtils.GetValueAsString(xmlConfigElement, "TrainingFile");
+            var passwords = PasswordUtil.LoadPasswords(pwdfile, 8);
+            // Create a Markov model from the passwords. This model will be used
+            // as our seed for the evolution.
+            string seedFile = XmlUtils.GetValueAsString(xmlConfigElement, "SeedFile");
+            int outputs = MarkovFilterCreator.GenerateFirstOrderMarkovFilter(seedFile, passwords);
+            */
+
             // Load the training set passwords from file
             var passwords = PasswordUtil.LoadPasswords(trainingSetFile, 8); 
             
