@@ -212,23 +212,26 @@ namespace PasswordEvolution
             // Write the results to file.
             using (TextWriter writer = new StreamWriter(_generationalResultsFile, true))
             {
+                var maxFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.Fitness);
+                var maxAltFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
+                var genChampion = _ea.GenomeList.First(g => g.EvaluationInfo.Fitness == maxFitness);
                 Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _ea.CurrentGeneration,
-                                                            _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                            _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                            maxFitness,
+                                                            maxAltFitness,
                                                             _experiment.Evaluator.FoundPasswords.Count);
 
                 lock (_experiment.Evaluator.FoundPasswords)
                 {
                     Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
-                                                                _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                                _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                                maxFitness,
+                                                                maxAltFitness,
                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
                                                                 _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
                                                                 _experiment.Evaluator.FoundPasswords.Count);
                     writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
-                                                                    _ea.CurrentChampGenome.EvaluationInfo.Fitness,
-                                                                    _ea.CurrentChampGenome.EvaluationInfo.AlternativeFitness,
+                                                                    maxFitness,
+                                                                    maxAltFitness,
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
                                                                     _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
@@ -238,7 +241,7 @@ namespace PasswordEvolution
             }
           
             // Save the best genome to file
-            var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { _ea.CurrentChampGenome }, true);
+            var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { genChampion }, true);
             doc.Save(CHAMPION_FILE_ROOT + "_gen_" + _gens + ".xml");
 
             // If we've reached the maximum number of generations,
