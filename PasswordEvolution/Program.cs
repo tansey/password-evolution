@@ -43,7 +43,7 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 1000000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 1000; // mini-project.config.xml
 
         const int MAX_GENERATIONS = 10;
 
@@ -147,7 +147,6 @@ namespace PasswordEvolution
             // These are the passwords our models will try to guess.
             // PasswordsWithAccounts is the file used for validation. Its account values won't be changed.
             PasswordCrackingEvaluator.Passwords = _experiment.Passwords;
-            PasswordCrackingEvaluator.PasswordsWithAccounts = new Dictionary<string,double>(_experiment.Passwords); // Makes a deep copy
 
             Console.WriteLine("Loading seed...");
             
@@ -189,7 +188,7 @@ namespace PasswordEvolution
             ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
         }
 
-        static void ValidateModel(MarkovChain model, Dictionary<string, double> passwords, int guesses, bool hashed ) //passwords here is not used...
+        static void ValidateModel(MarkovChain model, Dictionary<string, PasswordInfo> passwords, int guesses, bool hashed ) //passwords here is not used...
         {
             Console.Write("Validating on {0} guesses... ", guesses);
             PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(guesses, hashed);
@@ -205,6 +204,7 @@ namespace PasswordEvolution
         /// </summary>
         static void logEvolutionProgress(object sender, EventArgs e)
         {
+            Console.WriteLine("Number of genomes at the start of logEvol: " + _ea.GenomeList.Count);
             var maxFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.Fitness);
             var maxAltFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
             var genChampion = _ea.GenomeList.First(g => g.EvaluationInfo.Fitness == maxFitness);
@@ -223,14 +223,14 @@ namespace PasswordEvolution
                                                                 maxAltFitness,
                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
                                                                 _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
-                                                                _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
+                                                                _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s].Accounts),
                                                                 _experiment.Evaluator.FoundPasswords.Count);
                     writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _ea.CurrentGeneration,
                                                                     maxFitness,
                                                                     maxAltFitness,
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.Fitness),
                                                                     _ea.GenomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
-                                                                    _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s]),
+                                                                    _experiment.Evaluator.FoundPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s].Accounts),
                                                                     _experiment.Evaluator.FoundPasswords.Count);
                 }
                 Console.WriteLine("Done.");
@@ -251,7 +251,7 @@ namespace PasswordEvolution
         #region Code to run the static model comparison of first-order vs. layered
         // TODO: Clean up and refactor this entire section.
 
-        static Dictionary<string, double>[] _passwords;
+        static Dictionary<string, PasswordInfo>[] _passwords;
         static PasswordDatasetInfo[] _datasetFilenames;
         static object _writerLock = new object();
 
@@ -271,7 +271,7 @@ namespace PasswordEvolution
             };
 
             Console.WriteLine("Loading all {0} password datasets...", _datasetFilenames.Length);
-            _passwords = new Dictionary<string, double>[_datasetFilenames.Length];
+            _passwords = new Dictionary<string, PasswordInfo>[_datasetFilenames.Length];
             for (int i = 0; i < _passwords.Length; i++)
             {
                 Console.WriteLine(_datasetFilenames[i].Name);
@@ -330,8 +330,7 @@ namespace PasswordEvolution
                         Console.Write("Validating {0} {1} model on {2} with {3} guesses... ", models[m], _datasetFilenames[i].Name, _datasetFilenames[j].Name, VALIDATION_GUESSES);
                         PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(VALIDATION_GUESSES, false);
                         var results = eval.Validate(model, _passwords[j], EXPERIMENT_OFFSET + models[m] + "-" + _datasetFilenames[i].Name + "-" + _datasetFilenames[j].Name + ".csv", 10000);
-                       // Console.WriteLine("Accounts: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
-                        Console.WriteLine("Total Score: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
+                        Console.WriteLine("Total Reward: {0} Uniques: {1}", results._fitness, results._alternativeFitness);
 
                         lock(_writerLock)
                             using (TextWriter writer = new StreamWriter(@"..\..\..\experiments\summary_results.csv", true))
@@ -340,7 +339,7 @@ namespace PasswordEvolution
                                     _datasetFilenames[j].Name, 
                                     results._fitness, 
                                     results._alternativeFitness,
-                                    results._fitness / (double)_passwords[j].Sum(kv => kv.Value) * 100,
+                                    results._fitness / (double)_passwords[j].Sum(kv => kv.Value.Reward) * 100,
                                     results._alternativeFitness / (double)_passwords[j].Count * 100); 
                     }
                 }

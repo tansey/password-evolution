@@ -61,7 +61,7 @@ namespace PasswordEvolution
         /// </summary>
         private static void ProcessBattlefieldHeroesFile()
         {
-            Dictionary<string, double> passwords = new Dictionary<string, double>();
+            Dictionary<string, PasswordInfo> passwords = new Dictionary<string, PasswordInfo>();
             using (TextReader reader = new StreamReader(@"..\..\..\passwords\battlefield_heroes.csv"))
             {
                 string line = null;
@@ -72,11 +72,12 @@ namespace PasswordEvolution
 
                     var tokens = line.Split(';');
                     string pw = tokens.Last().Trim('"');
-                    double val;
+                    PasswordInfo val;
                     if (!passwords.TryGetValue(pw, out val))
-                        passwords.Add(pw, 0);
+                        passwords.Add(pw, new PasswordInfo(0,0));
 
-                    passwords[pw]++;
+                    passwords[pw].Accounts++;
+                    passwords[pw].Reward++;
                 }
             }
             using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\battlefield_heroes.txt"))

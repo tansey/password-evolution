@@ -14,9 +14,9 @@
  
     Fitness is the number of passwords cracked by the individual.
   </Description>
-  <Guesses>10000</Guesses>
+  <Guesses>100</Guesses>
   <Hashed>False</Hashed>
-  <ValidationGuesses>1000000</ValidationGuesses>
+  <ValidationGuesses>1000</ValidationGuesses>
   <ValidationPasswordFile>..\..\..\passwords\toyDistributionSet.txt</ValidationPasswordFile>
  
   <TrainingFile>..\..\..\passwords\toyDistributionSet.txt</TrainingFile>

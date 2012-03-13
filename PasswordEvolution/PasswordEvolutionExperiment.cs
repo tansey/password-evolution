@@ -32,13 +32,13 @@ namespace PasswordEvolution
         ParallelOptions _parallelOptions;
         string[] _states;
         int _guesses;
-        Dictionary<string, double> _passwords;
+        Dictionary<string, PasswordInfo> _passwords;
         IActivationFunctionLibrary _activationFnLibrary;
         PasswordCrackingEvaluator _evaluator;
         int _outputs;
 
         #region Properties
-        public Dictionary<string, double> Passwords
+        public Dictionary<string, PasswordInfo> Passwords
         {
             get { return _passwords; }
             set { _passwords = value; }
@@ -131,7 +131,6 @@ namespace PasswordEvolution
             ValidationGuesses = XmlUtils.GetValueAsInt(xmlConfig, "ValidationGuesses");
 
             // Load the passwords from file
-       //     Console.Write("Loading passwords...");
             string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "ValidationPasswordFile");
             Console.Write("Loading passwords from [{0}]...", pwdfile);
             if (_passwords == null || _passwords.Count == 0)
@@ -273,14 +272,16 @@ namespace PasswordEvolution
         //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
             IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
 
-
+            /*
             // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes
             // that were in the population in previous generations (elite genomes). This is determiend by examining each genome's evaluation info object.
             IGenomeListEvaluator<NeatGenome> selectiveEvaluator = new SelectiveGenomeListEvaluator<NeatGenome>(
                                                                                     innerEvaluator,
                                                                                     SelectiveGenomeListEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
+            */
+             
             // Initialize the evolution algorithm.
-            ea.Initialize(selectiveEvaluator, genomeFactory, genomeList);
+            ea.Initialize(innerEvaluator, genomeFactory, genomeList);
 
             // Finished. Return the evolution algorithm
             return ea;

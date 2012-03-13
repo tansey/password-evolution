@@ -3,6 +3,7 @@ using SharpNeat.Core;
 using SharpNeat.Genomes.Neat;
 using SharpNeatMarkovModels;
 using System.Threading.Tasks;
+using System;
 namespace PasswordEvolution
 {
     /// <summary>
@@ -77,12 +78,18 @@ namespace PasswordEvolution
             _passwordCrackingEvaluator.Reset();
         }
 
+        public void Evaluate(IList<TGenome> genomeList)
+        {
+            EvaluateNeat((IList<NeatGenome>)genomeList);
+        }
+
         /// <summary>
         /// Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         /// and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
-        public void Evaluate(IList<NeatGenome> genomeList)
+        public void EvaluateNeat(IList<NeatGenome> genomeList)
         {
+            Console.WriteLine("Number of genomes right before EvaluateNeat: " + genomeList.Count);
             Parallel.ForEach(genomeList, delegate(NeatGenome genome)
             {
                 MarkovChain phenome = _genomeDecoder.Decode(genome);
@@ -109,8 +116,8 @@ namespace PasswordEvolution
             foreach (string p in _passwordCrackingEvaluator.FoundPasswords)
             {
                 //PasswordCrackingEvaluator.Passwords.Remove(p);
-                double val = PasswordCrackingEvaluator.Passwords[p];
-                PasswordCrackingEvaluator.Passwords[p] = val * 0.75;
+                double val = PasswordCrackingEvaluator.Passwords[p].Reward;
+                PasswordCrackingEvaluator.Passwords[p].Reward = val * 0.75;
             }
         }
 

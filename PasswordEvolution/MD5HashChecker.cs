@@ -16,10 +16,10 @@ namespace PasswordEvolution
     {
         MD5 _md5;
         MD5Crypt _md5salt;
-        Dictionary<string, double> _passwords;
+        Dictionary<string, PasswordInfo> _passwords;
         List<string> _salts;
 
-        public MD5HashChecker(Dictionary<string, double> passwords)
+        public MD5HashChecker(Dictionary<string, PasswordInfo> passwords)
         {
             _passwords = passwords;
             _md5 = MD5.Create();
@@ -27,7 +27,7 @@ namespace PasswordEvolution
 
         public MD5HashChecker(string dbFilename, bool salted = false)
         {
-            _passwords = new Dictionary<string, double>();
+            _passwords = new Dictionary<string, PasswordInfo>();
             _md5 = MD5.Create();
             if (salted)
             {
@@ -54,11 +54,12 @@ namespace PasswordEvolution
                         _salts.Add(tokens.Last().Trim('"'));
                         pw = tokens[tokens.Length - 2].Trim('"');
                     }
-                    double val;
+                    PasswordInfo val;
                     if (!_passwords.TryGetValue(pw, out val))
-                        _passwords.Add(pw, 0);
+                        _passwords.Add(pw, new PasswordInfo(0,0));
 
-                    _passwords[pw]++;
+                    _passwords[pw].Accounts++;
+                    _passwords[pw].Reward++;
                 }
             }
 
@@ -93,9 +94,9 @@ namespace PasswordEvolution
             if (_salts == null)
             {
                 string hash = GetMd5Hash(pw);
-                double val;
+                PasswordInfo val;
                 if (_passwords.TryGetValue(hash, out val))
-                    return val;
+                    return val.Accounts;
             }
             else
             {
@@ -103,9 +104,9 @@ namespace PasswordEvolution
                 foreach (string salt in _salts)
                 {
                     string hashsalt = _md5salt.crypt(pw, salt);
-                    double val;
+                    PasswordInfo val;
                     if (_passwords.TryGetValue(hashsalt, out val))
-                        count += val;
+                        count += val.Reward;
                 }
                 return count;
             }
