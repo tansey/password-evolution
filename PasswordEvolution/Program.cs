@@ -43,9 +43,11 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 1000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 1000000; // mini-project.config.xml
 
         const int MAX_GENERATIONS = 10;
+
+        const bool VALIDATE_ALL_STAR = false;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
@@ -182,10 +184,38 @@ namespace PasswordEvolution
             // Wait until the evolution is finished.
             while (_ea.RunState == RunState.Running) { Thread.Sleep(1000); }
 
-            // Validate the resulting model.
-            var decoder = _experiment.CreateGenomeDecoder();
-            var champ = decoder.Decode(_ea.CurrentChampGenome);
-            ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            if (VALIDATE_ALL_STAR)
+            {
+                // Validate the champions of each generation.
+                List<MarkovChain> championModels = new List<MarkovChain>();
+                for (int i = 0; i < MAX_GENERATIONS; i++)
+                {
+                    var currentChamp = _experiment.LoadPopulation(XmlReader.Create(CHAMPION_FILE_ROOT + "_gen_" + i + ".xml"))[0];
+                    var champModel = _experiment.CreateGenomeDecoder().Decode(currentChamp);
+                    championModels.Add(champModel);
+                }
+                ValidateAllstarTeam(championModels, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            }
+            else
+            {
+                // Validate the resulting model.
+                var decoder = _experiment.CreateGenomeDecoder();
+                var champ = decoder.Decode(_ea.CurrentChampGenome);
+                ValidateModel(champ, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            }
+
+        }
+
+
+        static void ValidateAllstarTeam(List<MarkovChain> models, Dictionary<string, PasswordInfo> passwords, int guesses, bool hashed) //passwords here is not used...
+        {
+           // Console.WriteLine("Number of champion models: {0}", models.Count);
+            Console.WriteLine("Validating All-Star Team on {0} guesses...", guesses);
+            PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(guesses, hashed);
+            eval.ValidatePopulation(models);
+            double accounts = eval.FoundValidationPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s].Accounts);
+            double uniques = eval.FoundValidationPasswords.Count;
+            Console.WriteLine("Accounts: {0} Uniques: {1}", accounts, uniques);
         }
 
         static void ValidateModel(MarkovChain model, Dictionary<string, PasswordInfo> passwords, int guesses, bool hashed ) //passwords here is not used...
@@ -204,7 +234,7 @@ namespace PasswordEvolution
         /// </summary>
         static void logEvolutionProgress(object sender, EventArgs e)
         {
-            Console.WriteLine("Number of genomes at the start of logEvol: " + _ea.GenomeList.Count);
+            //Console.WriteLine("Number of genomes at the start of logEvol: " + _ea.GenomeList.Count);
             var maxFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.Fitness);
             var maxAltFitness = _ea.GenomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
             var genChampion = _ea.GenomeList.First(g => g.EvaluationInfo.Fitness == maxFitness);
