@@ -98,7 +98,7 @@
     <Fn id="95" name="MC-END" prob="0.010416666666666666" />
   </ActivationFunctions>
   <Networks>
-    <Network id="147" birthGen="1" fitness="6">
+    <Network id="32" birthGen="0" fitness="3909.5">
       <Nodes>
         <Node type="bias" id="0" fnId="0" />
         <Node type="in" id="1" fnId="0" />
@@ -580,7 +580,7 @@
         <Con id="475" src="13" tgt="88" wght="0.00789473684210526" />
         <Con id="476" src="13" tgt="89" wght="0.00526315789473684" />
         <Con id="477" src="13" tgt="90" wght="0.00263157894736842" />
-        <Con id="478" src="13" tgt="91" wght="-0.0059204143461673523" />
+        <Con id="478" src="13" tgt="91" wght="0.00263157894736842" />
         <Con id="479" src="13" tgt="92" wght="0.00263157894736842" />
         <Con id="480" src="1" tgt="14" wght="1.00788163438086E-05" />
         <Con id="481" src="14" tgt="2" wght="0.00318471337579618" />
@@ -2185,7 +2185,7 @@
         <Con id="2080" src="43" tgt="82" wght="7.07714083510262E-05" />
         <Con id="2081" src="43" tgt="84" wght="0.00127388535031847" />
         <Con id="2082" src="43" tgt="85" wght="0.00601556970983723" />
-        <Con id="2083" src="43" tgt="86" wght="0.000849256900212314" />
+        <Con id="2083" src="43" tgt="86" wght="-0.0780521875908636" />
         <Con id="2084" src="43" tgt="87" wght="0.000141542816702052" />
         <Con id="2085" src="43" tgt="89" wght="7.07714083510262E-05" />
         <Con id="2086" src="1" tgt="44" wght="0.000524098449878046" />

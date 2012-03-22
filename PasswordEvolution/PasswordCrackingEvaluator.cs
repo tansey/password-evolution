@@ -26,6 +26,11 @@ namespace PasswordEvolution
         {
             _guesses = guessesPerIndividual;
             FoundPasswords = new HashSet<string>();
+
+            // Begin Janek added
+            FoundValidationPasswords = new HashSet<string>();
+            // End Janek added
+
             if (hashed)
                 _md5 = new MD5HashChecker(Passwords);
         }
@@ -46,6 +51,8 @@ namespace PasswordEvolution
         }
 
         public HashSet<string> FoundPasswords { get; set; }
+
+        public HashSet<string> FoundValidationPasswords { get; set; }
 
         /// <summary>
         /// The fitness function for a candidate Markov model. It uses the number of accounts
@@ -155,9 +162,6 @@ namespace PasswordEvolution
                 {
                     score += count;
                     uniques++;
-                    //
-                    //Console.WriteLine("Password found: {0}", guess);
-                    //
                     found.Add(guess);
                 }
             }
@@ -216,6 +220,56 @@ namespace PasswordEvolution
             }
 
             return new FitnessInfo(score, uniques);
+        }
+
+        public bool ValidatePopulation(List<MarkovChain> models)
+        {
+            foreach (MarkovChain m in models)
+                ValidatePopHelper(m);
+            return true;
+        }
+
+        /// <summary>
+        /// Validate a model against a large number of guesses.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public bool ValidatePopHelper(MarkovChain model)
+        {
+          //  double score = 0;
+          //  int uniques = 0;
+
+            HashSet<string> found = new HashSet<string>();
+            for (int i = 0; i < _guesses; i++)
+            {
+                if (i > 0 && i % 100000000 == 0)
+                    Console.WriteLine(i);
+
+                var guess = model.Activate();
+
+                if (found.Contains(guess))
+                    continue;
+
+                double count = 0;
+                PasswordInfo temp;
+                if (_md5 != null)
+                    count = _md5.InDatabase(guess);
+                else
+                {
+                    if (Passwords.TryGetValue(guess, out temp))
+                        count = temp.Accounts;
+                }
+
+                if (count > 0)
+                {
+                  //  score += count;
+                  //  uniques++;
+                    lock (FoundValidationPasswords)
+                        FoundValidationPasswords.Add(guess);
+                }
+            }
+
+            return true;
         }
     }
 }

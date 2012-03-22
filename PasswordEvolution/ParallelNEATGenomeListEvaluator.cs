@@ -89,7 +89,7 @@ namespace PasswordEvolution
         /// </summary>
         public void EvaluateNeat(IList<NeatGenome> genomeList)
         {
-            Console.WriteLine("Number of genomes right before EvaluateNeat: " + genomeList.Count);
+            //Console.WriteLine("Number of genomes right before EvaluateNeat: " + genomeList.Count);
             Parallel.ForEach(genomeList, delegate(NeatGenome genome)
             {
                 MarkovChain phenome = _genomeDecoder.Decode(genome);
