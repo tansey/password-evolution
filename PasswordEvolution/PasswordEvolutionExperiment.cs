@@ -270,7 +270,7 @@ namespace PasswordEvolution
 
             // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
         //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
-            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
+            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator,this);
 
             /*
             // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes
