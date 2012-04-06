@@ -43,11 +43,11 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 1000000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 10000; // mini-project.config.xml
 
-        const int MAX_GENERATIONS = 10;
+        const int MAX_GENERATIONS = 5;
 
-        const bool VALIDATE_ALL_STAR = false;
+        const bool VALIDATE_ALL_STAR = true;
 
         const string PHPBB_DATASET = @"..\..\..\passwords\phpbb-withcount.txt";
         const string PHPBB_SEED_FILE = @"..\..\..\experiments\phpbb_seed.xml";
@@ -108,6 +108,11 @@ namespace PasswordEvolution
         //private static void RunExperiment(string trainingSetFile, string seedFile, string configFile, string resultsFile, bool validateSeed = false)
         private static void RunExperiment(string configFile, bool validateSeed = false)
         {
+            Console.WriteLine("Removing previous champions...");
+            string[] oldChampionFiles = Directory.GetFiles(@"..\..\..\experiments\champions\", "*.xml");
+            foreach (string oldChampion in oldChampionFiles)
+                File.Delete(oldChampion);
+
             Console.Write("Building Markov model...");
             
             // Load the XML configuration file
@@ -188,13 +193,27 @@ namespace PasswordEvolution
             {
                 // Validate the champions of each generation.
                 List<MarkovChain> championModels = new List<MarkovChain>();
-                for (int i = 0; i < MAX_GENERATIONS; i++)
+                string[] championFiles = Directory.GetFiles(@"..\..\..\experiments\champions\", "*.xml");
+                foreach (string championFile in championFiles)
                 {
-                    var currentChamp = _experiment.LoadPopulation(XmlReader.Create(CHAMPION_FILE_ROOT + "_gen_" + i + ".xml"))[0];
+                    var currentChamp = _experiment.LoadPopulation(XmlReader.Create(championFile))[0];
                     var champModel = _experiment.CreateGenomeDecoder().Decode(currentChamp);
                     championModels.Add(champModel);
                 }
-                ValidateAllstarTeam(championModels, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+                ValidateForest(championModels, _experiment.Passwords, VALIDATION_GUESSES/championFiles.Length, _experiment.Hashed);
+
+                // Validate a population made up of copies of the final champion.
+            /*    List<MarkovChain> championCopyPop = new List<MarkovChain>();
+
+                Console.WriteLine("\nValidating the final champion population");
+                for (int i = 0; i < MAX_GENERATIONS; i++)
+                {
+                    var decoder = _experiment.CreateGenomeDecoder();
+                    var champ = decoder.Decode(_ea.CurrentChampGenome);
+                    championCopyPop.Add(champ);
+                }
+                ValidateAllstarTeam(championCopyPop, _experiment.Passwords, VALIDATION_GUESSES, _experiment.Hashed);
+            */
             }
             else
             {
@@ -207,10 +226,10 @@ namespace PasswordEvolution
         }
 
 
-        static void ValidateAllstarTeam(List<MarkovChain> models, Dictionary<string, PasswordInfo> passwords, int guesses, bool hashed) //passwords here is not used...
+        static void ValidateForest(List<MarkovChain> models, Dictionary<string, PasswordInfo> passwords, int guesses, bool hashed) //passwords here is not used...
         {
-           // Console.WriteLine("Number of champion models: {0}", models.Count);
-            Console.WriteLine("Validating All-Star Team on {0} guesses...", guesses);
+            Console.WriteLine("Number of champion models: {0}", models.Count);
+            Console.WriteLine("Validating All-Star Team on {0} guesses each...", guesses);
             PasswordCrackingEvaluator eval = new PasswordCrackingEvaluator(guesses, hashed);
             eval.ValidatePopulation(models);
             double accounts = eval.FoundValidationPasswords.Sum(s => PasswordCrackingEvaluator.Passwords[s].Accounts);
@@ -265,11 +284,13 @@ namespace PasswordEvolution
                 }
                 Console.WriteLine("Done.");
             }
-          
-            // Save the best genome to file
-            var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { genChampion }, true);
-            doc.Save(CHAMPION_FILE_ROOT + "_gen_" + _gens + ".xml");
-
+            if (_gens <= MAX_GENERATIONS)
+            {
+                // Save the best genome to file
+                var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { genChampion }, true);
+                doc.Save(CHAMPION_FILE_ROOT + "_gen_" + _gens + ".xml");
+            }
+            
             // If we've reached the maximum number of generations,
             // tell the algorithm to stop.
             if (_gens >= MAX_GENERATIONS)

@@ -16,7 +16,7 @@
   </Description>
   <Guesses>10000</Guesses>
   <Hashed>False</Hashed>
-  <ValidationGuesses>1000000</ValidationGuesses>
+  <ValidationGuesses>10000</ValidationGuesses>
   <ValidationPasswordFile>..\..\..\passwords\toyDistributionSet.txt</ValidationPasswordFile>
  
   <TrainingFile>..\..\..\passwords\toyDistributionSet.txt</TrainingFile>
