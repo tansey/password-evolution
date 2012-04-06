@@ -43,9 +43,9 @@ namespace PasswordEvolution
         const string HASHED_RESULTS_FILE = @"..\..\..\experiments\hashed_results.csv";
         const string FILTERED_MYSPACE_PASSWORDS = @"..\..\..\passwords\myspace-filtered-withcount.txt";
         //const int VALIDATION_GUESSES = 1000000000; // config.xml
-        const int VALIDATION_GUESSES = 10000; // mini-project.config.xml
+        const int VALIDATION_GUESSES = 1000000000; // mini-project.config.xml
 
-        const int MAX_GENERATIONS = 5;
+        const int MAX_GENERATIONS = 200;
 
         const bool VALIDATE_ALL_STAR = true;
 
