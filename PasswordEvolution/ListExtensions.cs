@@ -162,5 +162,21 @@ namespace PasswordEvolution
             }
             return sb.ToString();
         }
+
+        public static T ArgMax<T>(this IEnumerable<T> list, Func<T, double> selector)
+        {
+            double maxVal = 0;
+            T max = list.FirstOrDefault();
+            foreach (var t in list)
+            {
+                double d = selector(t);
+                if (d > maxVal)
+                {
+                    maxVal = d;
+                    max = t;
+                }
+            }
+            return max;
+        }
     }
 }

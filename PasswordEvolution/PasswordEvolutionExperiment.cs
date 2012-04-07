@@ -131,18 +131,22 @@ namespace PasswordEvolution
             ValidationGuesses = XmlUtils.GetValueAsInt(xmlConfig, "ValidationGuesses");
 
             // Load the passwords from file
-            string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "ValidationPasswordFile");
-            Console.Write("Loading passwords from [{0}]...", pwdfile);
-            if (_passwords == null || _passwords.Count == 0)
+            string pwdfile = XmlUtils.TryGetValueAsString(xmlConfig, "ValidationPasswordFile");
+            if (pwdfile != null)
             {
-                int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
-                if (pwLength.HasValue)
-                    Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
-                _passwords = PasswordUtil.LoadPasswords(pwdfile, pwLength);
+                Console.Write("Loading passwords from [{0}]...", pwdfile);
+                if (_passwords == null || _passwords.Count == 0)
+                {
+                    int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
+                    if (pwLength.HasValue)
+                        Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
+                    _passwords = PasswordUtil.LoadPasswords(pwdfile, pwLength);
+                }
+                else
+                    Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
             }
             else
-                Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
-
+                Console.WriteLine("WARNING: Not loading passwords for experiment (not provided in config file)");
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParams.SpecieCount = _specieCount;
             _neatGenomeParams = new NeatGenomeParameters();
