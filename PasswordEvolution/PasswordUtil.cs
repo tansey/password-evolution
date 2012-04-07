@@ -11,7 +11,7 @@ namespace PasswordEvolution
     /// </summary>
     public static class PasswordUtil
     {
-        public static Dictionary<string, PasswordInfo> LoadPasswords(string pwdfile, double? length = null)
+        public static Dictionary<string, PasswordInfo> LoadPasswords(string pwdfile, int? length = null)
         {
             var passwords = new Dictionary<string, PasswordInfo>();
             ulong best = 0;
