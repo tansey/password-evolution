@@ -118,19 +118,18 @@ namespace CondorApp
             {
                // Name = name,
                 EnsembleSize = 200,
-                Generations = 200,
-                //EnsembleGuesses = //default value? 
+                Generations = 200, 
                 //TrainingDb = ,
                 //EvolutionDb = ,
                 //ValidationDb = ,
                 PasswordLength = 8,
                 PopulationSize = 100,
                 ValidationGuesses = 1000000000,
-                EvaluationGuesses = 10000000 ,//same as guesses?
+                EvaluationGuesses = 10000000 ,//same as guesses
                 ChampionFilePath = @"../../../experiments/champions/champion"
                 //ExperimentPath =   // what's the path of the experiment
             };
-
+            cp.EnsembleGuesses = cp.EvaluationGuesses / cp.EnsembleSize;
             return cp;
         }
 
