@@ -5,9 +5,10 @@ using SharpNeatMarkovModels;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using PasswordEvolution;
 
 
-namespace PasswordEvolution
+namespace CondorApp
 {
     public class CondorEvaluator : IGenomeListEvaluator<NeatGenome>
     {
@@ -31,27 +32,45 @@ namespace PasswordEvolution
         readonly string CONDOR_LOG_FORMAT;
         readonly string ERROR_FORMAT;
         readonly int? PASSWORD_LENGTH;
+        readonly string USER_GROUP;
 
         ulong _evaluationCount;
         int _generations;
+        Dictionary<string, double> _passwords;
 
         /// <summary>
         /// Construct a new distributed evaluator that leverages the UTCS Condor cluster.
         /// Note that experimentDir must already exist, but it can be empty.
+        /// If the passwords dictionary is specified, then it will be written to a temporary
+        /// file every generation and used for evaluation. If it's null, then the password
+        /// file in the config file will be used.
         /// </summary>
         public CondorEvaluator(string experimentDir, string configFile, 
-                                bool writePasswords = true, int? passwordLength = null)
+                                CondorGroup userGroup,
+                                Dictionary<string,double> passwords = null,
+                                int? passwordLength = null)
         {
             // convert to unix pathnames
             experimentDir = experimentDir.Replace('\\', '/');
-
+            string originalConfig = configFile.Replace('\\', '/');
+            
             // append directory
             if(!experimentDir.EndsWith("/"))
                 experimentDir += "/";
 
+            
+            switch (userGroup)
+            {
+                case CondorGroup.Grad: USER_GROUP = "GRAD";
+                    break;
+                case CondorGroup.Undergrad: USER_GROUP = "UNDER";
+                    break;
+                default: throw new Exception("Unknown group");
+            }
+
             // set the directories for the experiments, creating if necessary
             BASE_DIR = experimentDir;
-            CONFIG_FILE = configFile;
+            CONFIG_FILE = experimentDir + "config.xml";
             CONDOR_FILE = experimentDir + "jobs";
             GENOMES_FORMAT = createFileFormat(GENOMES_DIR, "genome_{0}.xml");
             RESULTS_FORMAT = createFileFormat(RESULTS_DIR, "results_{0}.txt");
@@ -61,8 +80,14 @@ namespace PasswordEvolution
             CONDOR_LOG_FORMAT = createFileFormat(CONDOR_LOGS_DIR, "job_{0}.log");
             ERROR_FORMAT = createFileFormat(ERROR_DIR, "error_{0}.log");
 
-            if(writePasswords)
+            // Copy the config file to the experiment directory
+            File.Copy(originalConfig, CONFIG_FILE, true);
+
+            if (passwords != null)
+            {
+                _passwords = passwords;
                 PASSWORDS_FILE = experimentDir + "passwords.txt";
+            }
             PASSWORD_LENGTH = passwordLength;
         }
 
@@ -83,10 +108,15 @@ namespace PasswordEvolution
             // Write the genomes to file
             writeGenomes(genomeList);
 
-            // create the condor jobs
+            // If we're using a dynamic password value, 
+            // write the new pw database to file
+            if (_passwords != null)
+                writePasswords();
+
+            // Create the condor jobs
             createCondorJobs(genomeList);
 
-            // submit the condor jobs using condor_submit
+            // Submit the condor jobs using condor_submit
             submitCondorJobs();
             
             // Wait for all the evaluations to finish
@@ -100,6 +130,13 @@ namespace PasswordEvolution
 
             _evaluationCount += (ulong)genomeList.Count;
             _generations++;
+        }
+
+        private void writePasswords()
+        {
+            using (TextWriter writer = new StreamWriter(PASSWORDS_FILE))
+                foreach (var kv in _passwords)
+                    writer.WriteLine("{0} {1}", kv.Value, kv.Key);
         }
 
         private void submitCondorJobs()
@@ -130,8 +167,8 @@ namespace PasswordEvolution
                 writer.WriteLine("universe = vanilla");
                 writer.WriteLine("Initialdir = " + BASE_DIR);
                 writer.WriteLine("Executable=/lusr/opt/mono-2.10.8/bin/mono");
-                writer.WriteLine("+Group   = \"GRAD\"");
-                writer.WriteLine("+Project = \"AI/ROBOTICS\"");
+                writer.WriteLine(string.Format("+Group   = \"{0}\"", USER_GROUP));
+                writer.WriteLine("+Project = \"AI_ROBOTICS\"");
                 writer.WriteLine("+ProjectDescription = \"Password evolution experiments\"");
 
                 for (int i = 0; i < genomeList.Count; i++)
