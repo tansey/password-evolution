@@ -29,9 +29,8 @@ namespace CondorApp
             int curArg = 0;
             //string experimentDir = args[curArg++];
             //string configFile = args[curArg++];
-
-           cp = CondorParameters.GetParameters(args);
-           
+            cp = CondorParameters.GetParameters(args);
+            RunExperiment();
            
         }
 
