@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="CondorEvaluator.cs" />
     <Compile Include="CondorGroup.cs" />
+    <Compile Include="CondorParameters.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -55,7 +55,7 @@ namespace CondorApp
                     case "c":
                         cp.ConfigFile = args[++i];
                         break;
-                    case "geneartions":
+                    case "generations":
                     case "g":
                         cp.Generations = Convert.ToInt32(args[++i]);
                         break;
@@ -75,7 +75,7 @@ namespace CondorApp
                     case "pwd":
                         cp.PasswordLength = Convert.ToInt32(args[++i]);
                         break;
-                    case "popultaion":
+                    case "population":
                     case "p":
                         cp.PopulationSize = Convert.ToInt32(args[++i]);
                         break;
