@@ -18,10 +18,15 @@
   <Hashed>False</Hashed>
 
   <ValidationGuesses>1000000000</ValidationGuesses>
-  <ValidationPasswordFile>/u/tansey/password-evolution/passwords/toyDistributionSet.txt</ValidationPasswordFile>
+  <ValidationPasswordFile>../../../passwords/toyDistributionSet.txt</ValidationPasswordFile>
+  <!--<ValidationPasswordFile>/u/tansey/password-evolution/passwords/toyDistributionSet.txt</ValidationPasswordFile> -->
  
-  <TrainingFile>/u/tansey/password-evolution/passwords/toyDistributionSet.txt</TrainingFile>
-  <SeedFile>/u/tansey/password-evolution/experiments/test/seed.xml</SeedFile>
-  <ResultsFile>/u/tansey/password-evolution/experiments/test/toy-distribution_results.csv</ResultsFile>
+  <!--<TrainingFile>../../../passwords/toyDistributionSet.txt</TrainingFile>
+  <SeedFile>../../password-evolution/experiments/test/seed.xml</SeedFile>
+  <ResultsFile>../../password-evolution/experiments/test/toy-distribution_results.csv</ResultsFile>
+  -->
+  <TrainingFile>..\..\..\passwords\toyDistributionSet.txt</TrainingFile>
+  <SeedFile>..\..\..\experiments\seed.xml</SeedFile>
+  <ResultsFile>..\..\..\experiments\toy-distribution_results.csv</ResultsFile>
   
 </Config>
