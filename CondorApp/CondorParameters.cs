@@ -23,6 +23,8 @@ namespace CondorApp
         public int EvaluationGuesses {get; set;}
         public string ResultsPath { get; set; }
 
+        public string ExperimentPath { get; set; }
+
 
         public static CondorParameters GetParameters(string[] args)
         {
@@ -40,23 +42,52 @@ namespace CondorApp
                     case "help": PrintHelp(); return null;
                     case "name":
                     case "n":
-                        string name = args[++i];
-                        cp.Name = name;
+                        cp.Name = args[++i];
                         break;
                     case "experimentdir":
                     case "expdir":
-                        string experimentDir = args[++i];
-                        cp.ExperimentDir = experimentDir;
+                        cp.ExperimentDir = args[++i];
                         break;
                     case "config":
                     case "c":
-                        string configFile = args[++i];
-                        cp.ConfigFile = configFile;
+                        cp.ConfigFile = args[++i];
                         break;
-
+                    case "geneartions":
+                    case "g":
+                        cp.Generations = Convert.ToInt32(args[++i]);
+                        break;
+                    case "trainingdb":
+                    case "tdb":
+                        cp.TrainingDb = args[++i];
+                        break;
+                    case "evolutiondb":
+                    case "edb":
+                         cp.TrainingDb = args[++i];
+                        break;
+                    case "validationdb":
+                    case "vdb":
+                        cp.ValidationDb = args[++i];
+                        break;
+                    case "passwordlength":
+                    case "pwd":
+                        cp.PasswordLength = Convert.ToInt32(args[++i]);
+                        break;
+                    case "popultaion":
+                    case "p":
+                        cp.PopulationSize = Convert.ToInt32(args[++i]);
+                        break;
+                    case "validation":
+                    case "v":
+                        cp.ValidationGuesses = Convert.ToInt32(args[++i]);
+                        break;
+                    case "evaluation":
+                    case "e":
+                        cp.EvaluationGuesses = Convert.ToInt32(args[++i]);
+                        break;
                 }
 
             }
+            cp.ResultsPath = cp.ExperimentPath + "_results.csv";  //gg.ExperimentPath + gg.Name + "_results.csv";
             
             return cp;
         }
@@ -77,7 +108,7 @@ namespace CondorApp
                 PopulationSize = 100,
                 ValidationGuesses = 1000000000,
                 EvaluationGuesses = 10000000 //same as guesses?
-
+                //ExperimentPath =   // what's the path of the experiment
             };
 
             return cp;
@@ -90,16 +121,15 @@ namespace CondorApp
             Console.WriteLine("-help".PadRight(25) + "Prints the usage summary.");
             Console.WriteLine("-name -n".PadRight(25) + "Name of the experiment.");
             Console.WriteLine("-experimentdir -expdir".PadRight(25) + "Directory of the experiment.");
-            Console.WriteLine("-config -c".PadRight(25) + "Name of the config file");
-
-            Console.WriteLine("-game -g".PadRight(25) + "Name of the game. Valid options: tictactoe, connect4, reversi. Default: tictactoe");
-            Console.WriteLine("-inputs -i".PadRight(25) + "Number of inputs for the neural network (usually # of board spaces). Default: 9");
-            Console.WriteLine("-outputs -o".PadRight(25) + "Number of outputs for the neural network (usually # of board spaces). Default: 9");
-            Console.WriteLine("-evaluator -eval -e".PadRight(25) + "Evaluation function to use. Valid options: random, coevolve, minimax, blondie, mcts. Default: random");
-            Console.WriteLine("-name -n".PadRight(25) + "Name of the experiment.");
-            Console.WriteLine("-winreward -win".PadRight(25) + "Reward an agent receives for winning a game. Default: 2");
-            Console.WriteLine("-tiereward -tie".PadRight(25) + "Reward an agent receives for tying a game. Default: 1");
-
+            Console.WriteLine("-config -c".PadRight(25) + "Name of the config file.");
+            Console.WriteLine("-generations -g".PadRight(25) + "Number of generations. Default: 200");
+            Console.WriteLine("-trainingdb -tdb".PadRight(25) + "Training Database file name.");
+            Console.WriteLine("-evolutiondb -edb".PadRight(25) + "Evolution Database file name.");
+            Console.WriteLine("-validationdb -vdb".PadRight(25) + "Validation Database file name.");
+            Console.WriteLine("-passwordlength -pwd".PadRight(25) + "Length of the passwords. Default: 8");
+            Console.WriteLine("-popultaion -p".PadRight(25) + "Size of the population. Default: 100");
+            Console.WriteLine("-validation -v".PadRight(25) + "Number of validation guesses. Default: 1000000000");
+            Console.WriteLine("-evaluation -e".PadRight(25) + "Number of evaluation guesses. Default: 10000000");
         }
 
 
