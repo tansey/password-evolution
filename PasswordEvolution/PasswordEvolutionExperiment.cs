@@ -208,12 +208,12 @@ namespace PasswordEvolution
         /// of the algorithm are also constructed and connected up.
         /// Uses the experiments default population size defined in the experiment's config XML.
         /// </summary>
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeListEvaluator<NeatGenome> eval = null)
         {
-            return CreateEvolutionAlgorithm(_populationSize);
+            return CreateEvolutionAlgorithm(_populationSize, eval);
         }
 
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(List<NeatGenome> seeds)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(List<NeatGenome> seeds, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -224,18 +224,7 @@ namespace PasswordEvolution
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
 
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed)
-        {
-            // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
-            IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
-
-            // Create an initial population of randomly generated genomes.
-            List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(_populationSize, 0, seed);
-
-            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
-        }
-
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed, IGenomeListEvaluator<NeatGenome> eval)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -246,13 +235,14 @@ namespace PasswordEvolution
             return CreateEvolutionAlgorithm(genomeFactory, genomeList, eval);
         }
 
+
         /// <summary>
         /// Create and return a NeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
         /// of the algorithm are also constructed and connected up.
         /// This overload accepts a population size parameter that specifies how many genomes to create in an initial randomly
         /// generated population.
         /// </summary>
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -261,7 +251,7 @@ namespace PasswordEvolution
             List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(populationSize, 0);
 
             // Create evolution algorithm.
-            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, eval);
         }
 
         public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList, IGenomeListEvaluator<NeatGenome> eval = null)
