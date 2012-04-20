@@ -10,8 +10,11 @@ namespace CondorApp
         static void Main(string[] args)
         {
             int curArg = 0;
-            string experimentDir = args[curArg++];
-            string configFile = args[curArg++];
+            //string experimentDir = args[curArg++];
+            //string configFile = args[curArg++];
+
+            CondorParameters cp = CondorParameters.GetParameters(args);
+           
         }
     }
 }
