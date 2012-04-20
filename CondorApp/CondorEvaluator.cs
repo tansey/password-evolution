@@ -102,7 +102,7 @@ namespace CondorApp
         public void Evaluate(IList<NeatGenome> genomeList)
         {
             // Clear any old flags from previous generations
-            foreach (var flag in Directory.GetFiles(FINISHED_FLAGS_DIR))
+            foreach (var flag in Directory.GetFiles(BASE_DIR + FINISHED_FLAGS_DIR))
                 File.Delete(flag);
 
             // Write the genomes to file
@@ -222,12 +222,12 @@ namespace CondorApp
             }
         }
 
-        private static void waitForEvaluations(int totalNumberGenomes)
+        private void waitForEvaluations(int totalNumberGenomes)
         {
             int numberGenomes = 0;
             do
             {
-                string[] flags = Directory.GetFiles(FINISHED_FLAGS_DIR);
+                string[] flags = Directory.GetFiles(BASE_DIR + FINISHED_FLAGS_DIR);
                 numberGenomes = flags.Length;
 
                 // Don't hog the CPU while we're waiting for the evaluation to finish
