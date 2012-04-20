@@ -84,6 +84,10 @@ namespace CondorApp
                     case "e":
                         cp.EvaluationGuesses = Convert.ToInt32(args[++i]);
                         break;
+                    case "ensemble":
+                    case "es":
+                        cp.EnsembleSize = Convert.ToInt32(args[++i]);
+                        break;
                 }
 
             }
@@ -98,7 +102,7 @@ namespace CondorApp
             CondorParameters cp = new CondorParameters()
             {
                 Name = name,
-                EnsembleSize = 5,
+                EnsembleSize = 200,
                 Generations = 200,
                 //EnsembleGuesses = //default value? 
                 //TrainingDb = ,
@@ -130,6 +134,7 @@ namespace CondorApp
             Console.WriteLine("-popultaion -p".PadRight(25) + "Size of the population. Default: 100");
             Console.WriteLine("-validation -v".PadRight(25) + "Number of validation guesses. Default: 1000000000");
             Console.WriteLine("-evaluation -e".PadRight(25) + "Number of evaluation guesses. Default: 10000000");
+            Console.WriteLine("-ensemble -es".PadRight(25) + "Size of the ensemble. Default: 200");
         }
 
 
