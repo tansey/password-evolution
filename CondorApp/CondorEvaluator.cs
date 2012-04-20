@@ -36,7 +36,7 @@ namespace CondorApp
 
         ulong _evaluationCount;
         int _generations;
-        Dictionary<string, double> _passwords;
+        Dictionary<string, PasswordInfo> _passwords;
 
         /// <summary>
         /// Construct a new distributed evaluator that leverages the UTCS Condor cluster.
@@ -47,7 +47,7 @@ namespace CondorApp
         /// </summary>
         public CondorEvaluator(string experimentDir, string configFile, 
                                 CondorGroup userGroup,
-                                Dictionary<string,double> passwords = null,
+                                Dictionary<string,PasswordInfo> passwords = null,
                                 int? passwordLength = null)
         {
             // convert to unix pathnames
@@ -136,7 +136,7 @@ namespace CondorApp
         {
             using (TextWriter writer = new StreamWriter(PASSWORDS_FILE))
                 foreach (var kv in _passwords)
-                    writer.WriteLine("{0} {1}", kv.Value, kv.Key);
+                    writer.WriteLine("{0} {1}", kv.Value.Reward, kv.Key);
         }
 
         private void submitCondorJobs()

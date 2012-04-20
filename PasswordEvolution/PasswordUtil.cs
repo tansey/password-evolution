@@ -32,14 +32,14 @@ namespace PasswordEvolution
                     if (pw.Length == 0)
                         continue;
 
-                    int count = tokens.Length == 1 ? 1 : int.Parse(tokens[0]);
+                    double count = tokens.Length == 1 ? 1 : double.Parse(tokens[0]);
 
                     if (!length.HasValue || pw.Length == length.Value)
                     {
                         // Add it to the list
                         try
                         {
-                            passwords.Add(pw, new PasswordInfo(count, count));
+                            passwords.Add(pw, new PasswordInfo((int)count, count));
                             best += (ulong)count;
                             if (count < countsHistogram.Length)
                                 countsHistogram[(int)(count - 1)]++;
