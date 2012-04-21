@@ -24,6 +24,9 @@ namespace CondorApp
         public string ResultsPath { get; set; }
 
         public string ExperimentPath { get; set; }
+        public string SeedFile { get; set; }
+        public string ResultsFile { get; set; }
+        public string ChampionFilePath { get; set; }
 
 
         public static CondorParameters GetParameters(string[] args)
@@ -88,6 +91,18 @@ namespace CondorApp
                     case "es":
                         cp.EnsembleSize = Convert.ToInt32(args[++i]);
                         break;
+                    case "seed":
+                    case "s":
+                        cp.SeedFile = args[++i];
+                        break;
+                    case "results":
+                    case "r":
+                        cp.ResultsFile = args[++i];
+                        break;
+                    case "champion":
+                    case "ch":
+                        cp.ChampionFilePath = args[++i];
+                        break;
                 }
 
             }
@@ -111,7 +126,8 @@ namespace CondorApp
                 PasswordLength = 8,
                 PopulationSize = 100,
                 ValidationGuesses = 1000000000,
-                EvaluationGuesses = 10000000 //same as guesses?
+                EvaluationGuesses = 10000000 ,//same as guesses?
+                ChampionFilePath = @"../../../experiments/champions/champion"
                 //ExperimentPath =   // what's the path of the experiment
             };
 
@@ -135,6 +151,9 @@ namespace CondorApp
             Console.WriteLine("-validation -v".PadRight(25) + "Number of validation guesses. Default: 1000000000");
             Console.WriteLine("-evaluation -e".PadRight(25) + "Number of evaluation guesses. Default: 10000000");
             Console.WriteLine("-ensemble -es".PadRight(25) + "Size of the ensemble. Default: 200");
+            Console.WriteLine("-seed -s".PadRight(25) + "The Seed file.");
+            Console.WriteLine("-results -r".PadRight(25) + "The file where the results will be written.");
+            Console.WriteLine("-champion -ch".PadRight(25) + "The path where the champion will be written. Default:const string CHAMPION_FILE_ROOT = ../../../experiments/champions/champion");
         }
 
 
