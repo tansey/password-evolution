@@ -31,7 +31,7 @@ namespace CondorApp
 
         public static CondorParameters GetParameters(string[] args)
         {
-            CondorParameters cp = DefaultParameters(args[0]);
+            CondorParameters cp = DefaultParameters();
 
             for (int i = 1; i < args.Length; i++)
             {
@@ -112,11 +112,11 @@ namespace CondorApp
         }
 
 
-        public static CondorParameters DefaultParameters(string name)
+        public static CondorParameters DefaultParameters()
         {
             CondorParameters cp = new CondorParameters()
             {
-                Name = name,
+               // Name = name,
                 EnsembleSize = 200,
                 Generations = 200,
                 //EnsembleGuesses = //default value? 
