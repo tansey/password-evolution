@@ -31,7 +31,13 @@ namespace CondorApp
 
         public static CondorParameters GetParameters(string[] args)
         {
+			if(args.Length == 0)
+			{
+				PrintHelp();
+				return null;
+			}
             CondorParameters cp = DefaultParameters();
+			cp.Name = args[0];
 
             for (int i = 1; i < args.Length; i++)
             {
@@ -65,7 +71,7 @@ namespace CondorApp
                         break;
                     case "evolutiondb":
                     case "edb":
-                         cp.TrainingDb = args[++i];
+                         cp.EvolutionDb = args[++i];
                         break;
                     case "validationdb":
                     case "vdb":
@@ -111,6 +117,10 @@ namespace CondorApp
             return cp;
         }
 
+		public override string ToString ()
+		{
+			return string.Format ("[CondorParameters: Name={0}\n, ExperimentDir={1}\n, ConfigFile={2}\n, EnsembleSize={3}\n, Generations={4}\n, EnsembleGuesses={5}\n, TrainingDb={6}\n, EvolutionDb={7}\n, ValidationDb={8}\n, PasswordLength={9}\n, PopulationSize={10}\n, ValidationGuesses={11}\n, EvaluationGuesses={12}\n, ResultsPath={13}\n, ExperimentPath={14}\n, SeedFile={15}\n, ResultsFile={16}\n, ChampionFilePath={17}\n]", Name, ExperimentDir, ConfigFile, EnsembleSize, Generations, EnsembleGuesses, TrainingDb, EvolutionDb, ValidationDb, PasswordLength, PopulationSize, ValidationGuesses, EvaluationGuesses, ResultsPath, ExperimentPath, SeedFile, ResultsFile, ChampionFilePath);
+		}
 
         public static CondorParameters DefaultParameters()
         {
@@ -133,7 +143,7 @@ namespace CondorApp
             return cp;
         }
 
-       static void PrintHelp()
+       public static void PrintHelp()
         {
             Console.WriteLine("Usage: AgentBenchmark.exe <name> [-options...]");
             Console.WriteLine("<name>".PadRight(25) + "File prefix to use when saving the config and results files.");

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System;
 using System.IO;
 using PasswordEvolution;
+using System.Linq;
 
 
 namespace CondorApp
@@ -16,7 +17,7 @@ namespace CondorApp
         readonly string CONDOR_FILE;
         readonly string CONFIG_FILE;
         readonly string PASSWORDS_FILE;
-        const string EXECUTABLE_PATH = "/u/tansey/password-evolution/executable/ModelEvaluator.exe";
+        const string EXECUTABLE_PATH = "/scratch/cluster/tansey/bin/ModelEvaluator.exe";
         const string GENOMES_DIR = "genomes/";
         const string RESULTS_DIR = "results/";
         const string FINISHED_FLAGS_DIR = "finished_flags/";
@@ -24,6 +25,7 @@ namespace CondorApp
         const string OUTPUT_DIR = "output/";
         const string CONDOR_LOGS_DIR = "condor_logs/";
         const string ERROR_DIR = "error/";
+		const string PASSWORDS_FOUND_DIR = "passwords_found/";
         readonly string GENOMES_FORMAT;
         readonly string RESULTS_FORMAT;
         readonly string FINISHED_FLAG_FORMAT;
@@ -31,12 +33,16 @@ namespace CondorApp
         readonly string OUTPUT_FORMAT;
         readonly string CONDOR_LOG_FORMAT;
         readonly string ERROR_FORMAT;
+		readonly string PASSWORDS_FOUND_FORMAT;
         readonly int? PASSWORD_LENGTH;
         readonly string USER_GROUP;
+		readonly int OUTPUT_COUNT;
+		readonly string AGGREGATE_RESULTS_FILE;
 
         ulong _evaluationCount;
         int _generations;
         Dictionary<string, PasswordInfo> _passwords;
+		public HashSet<string> Found { get; set; }
 
         /// <summary>
         /// Construct a new distributed evaluator that leverages the UTCS Condor cluster.
@@ -45,10 +51,13 @@ namespace CondorApp
         /// file every generation and used for evaluation. If it's null, then the password
         /// file in the config file will be used.
         /// </summary>
-        public CondorEvaluator(string experimentDir, string configFile, 
-                                CondorGroup userGroup,
-                                Dictionary<string,PasswordInfo> passwords = null,
-                                int? passwordLength = null)
+        public CondorEvaluator(string experimentDir, 
+		                       string configFile, 
+	                     	   string aggregateResultsFile,
+                               CondorGroup userGroup,
+	                           int outputCount,
+                               Dictionary<string,PasswordInfo> passwords = null,
+                               int? passwordLength = null)
         {
             // convert to unix pathnames
             experimentDir = experimentDir.Replace('\\', '/');
@@ -79,9 +88,14 @@ namespace CondorApp
             OUTPUT_FORMAT = createFileFormat(OUTPUT_DIR, "output_{0}.out");
             CONDOR_LOG_FORMAT = createFileFormat(CONDOR_LOGS_DIR, "job_{0}.log");
             ERROR_FORMAT = createFileFormat(ERROR_DIR, "error_{0}.log");
+			PASSWORDS_FOUND_FORMAT = createFileFormat(PASSWORDS_FOUND_DIR, "passwords_{0}.txt");
+
+			AGGREGATE_RESULTS_FILE = aggregateResultsFile;
 
             // Copy the config file to the experiment directory
             File.Copy(originalConfig, CONFIG_FILE, true);
+
+			OUTPUT_COUNT = outputCount;
 
             if (passwords != null)
             {
@@ -89,6 +103,8 @@ namespace CondorApp
                 PASSWORDS_FILE = experimentDir + "passwords.txt";
             }
             PASSWORD_LENGTH = passwordLength;
+
+			Found = new HashSet<string>();
         }
 
         private string createFileFormat(string subdir, string format)
@@ -127,6 +143,9 @@ namespace CondorApp
             
             // Log the champion manually here
             saveChampion(genomeList);
+
+			// Log the results
+			logResults(genomeList);
 
             _evaluationCount += (ulong)genomeList.Count;
             _generations++;
@@ -174,12 +193,16 @@ namespace CondorApp
                 for (int i = 0; i < genomeList.Count; i++)
                 {
                     writer.WriteLine("Log = " + string.Format(CONDOR_LOG_FORMAT, i));
-                    writer.WriteLine("Arguments = " + EXECUTABLE_PATH + " "
-                        + string.Format("{0} {1} {2} {3} {4} {5}",
-                        i, string.Format(GENOMES_FORMAT, i),
+                    writer.WriteLine("Arguments = " 
+					                 + EXECUTABLE_PATH + " "
+					                 + string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8}",
+                        i, 
+					    string.Format(GENOMES_FORMAT, i),
                         string.Format(RESULTS_FORMAT, i),
                         string.Format(FINISHED_FLAG_FORMAT, i),
+					    string.Format(PASSWORDS_FOUND_FORMAT, i),
                         CONFIG_FILE,
+					    OUTPUT_COUNT,
                         PASSWORDS_FILE == null ? "" : PASSWORDS_FILE,
                         PASSWORD_LENGTH.HasValue ? PASSWORD_LENGTH.Value.ToString() : ""
                         ));
@@ -219,8 +242,44 @@ namespace CondorApp
                     genome.EvaluationInfo.SetFitness(double.Parse(values[0]));
                     genome.EvaluationInfo.AlternativeFitness = double.Parse(values[1]);
                 }
+				using (TextReader reader = new StreamReader(string.Format(PASSWORDS_FOUND_FORMAT, a)))
+				{
+					string pw = null;
+					while((pw = reader.ReadLine()) != null)
+						Found.Add(pw);
+				}
             }
         }
+
+		private void logResults(IList<NeatGenome> genomeList)
+		{
+			var maxFitness = genomeList.Max(g => g.EvaluationInfo.Fitness);
+			var maxAltFitness = genomeList.Max(g => g.EvaluationInfo.AlternativeFitness);
+			// Write the results to file.
+			using (TextWriter writer = new StreamWriter(AGGREGATE_RESULTS_FILE, true))
+			{
+				Console.WriteLine("Gen {0}: {1} ({2}) Total: {3}", _generations,
+				                  maxFitness,
+				                  maxAltFitness,
+				                  Found.Count);
+
+				Console.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _generations,
+				                  maxFitness,
+				                  maxAltFitness,
+				                  genomeList.Average(g => g.EvaluationInfo.Fitness),
+				                  genomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
+				                  Found.Sum(s => Program.Accounts[s].Accounts),
+				                  Found.Count
+				                  );
+				writer.WriteLine("{0},{1},{2},{3},{4},{5},{6}", _generations,
+				                 maxFitness,
+				                 maxAltFitness,
+				                 genomeList.Average(g => g.EvaluationInfo.Fitness),
+				                 genomeList.Average(g => g.EvaluationInfo.AlternativeFitness),
+				                 Found.Sum(s => Program.Accounts[s].Accounts),
+				                 Found.Count);
+			}
+		}
 
         private void waitForEvaluations(int totalNumberGenomes)
         {
