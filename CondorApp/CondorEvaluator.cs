@@ -196,9 +196,9 @@ namespace CondorApp
                     writer.WriteLine("Arguments = " 
 					                 + EXECUTABLE_PATH + " "
 					                 + string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8}",
+		                string.Format(RESULTS_FORMAT, i),
                         i, 
 					    string.Format(GENOMES_FORMAT, i),
-                        string.Format(RESULTS_FORMAT, i),
                         string.Format(FINISHED_FLAG_FORMAT, i),
 					    string.Format(PASSWORDS_FOUND_FORMAT, i),
                         CONFIG_FILE,

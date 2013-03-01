@@ -15,16 +15,16 @@ namespace ModelEvaluator
         {
             if (args.Length < 7)
             {
-                Console.WriteLine("Usage: ModelEvaluator.exe <model_id> <model_file> <results_file> <finished_flag> <passwords_found_file> <config_file> <outputs> [passwords] [pw_length]");
+				Console.WriteLine("Usage: ModelEvaluator.exe <results_file> <model_id> <model_file> <finished_flag> <passwords_found_file> <config_file> <outputs> [passwords] [pw_length]");
                 return;
             }
 			Console.WriteLine("Starting");
             PasswordEvolutionExperiment experiment = new PasswordEvolutionExperiment();
 
             int curArg = 0;
+			string resultsFile = args[curArg++];
             int modelId = int.Parse(args[curArg++]);
 			string modelFile = args[curArg++];
-			string resultsFile = args[curArg++];
 			string finishedFlag = args[curArg++];
 			string passwordsFoundFile = args[curArg++];
 			string configFile = args[curArg++];
