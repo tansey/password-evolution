@@ -80,7 +80,7 @@ namespace PasswordEvolution
             //RunExperiment(PHPBB_DATASET, PHPBB_SEED_FILE, PHPBB_CONFIG_FILE, PHPBB_RESULTS_FILE, false);
 
             //Train on the toyDistribution dataset and evolve against the toyDistribution dataset
-            RunExperiment(TOY_DISTRIBUTION_CONFIG_FILE, false);
+            //RunExperiment(TOY_DISTRIBUTION_CONFIG_FILE, false);
 
             // Print some summary statistics about the distribution of passwords in the two morphed english dictionaries.
             // PasswordUtil.PrintStats(@"../../../passwords/morphed_english.txt"); // no creation rules
@@ -93,6 +93,16 @@ namespace PasswordEvolution
             // Check if a database of hashed passwords contains some common passwords (check for creation rules)
             // MD5HashChecker md5 = new MD5HashChecker(@"../../../passwords/stratfor_hashed.txt");
             // md5.PrintCounts();
+
+			// Load the training set passwords from file
+			var passwords = PasswordUtil.LoadPasswords(@"/Users/Wesley/Projects/password-evolution/passwords/morphed_english.txt", 8); 
+			
+			// Create a Markov model from the passwords. This model will be used
+			// as our seed for the evolution.
+			int outputs = MarkovFilterCreator.GenerateFirstOrderMarkovFilter(
+				@"/Users/Wesley/Projects/password-evolution/models/supervised/morphed_english.xml", passwords);
+
+			Console.WriteLine("Outputs: {0}", outputs);
         }
 
         /// <summary>
@@ -311,18 +321,18 @@ namespace PasswordEvolution
         static object _writerLock = new object();
 
         // Loads all the passwords and the configuration file.
-        static void PrepareMarkovModelRuns()
+        static void PrepareMarkovModelRuns(string results_file)
         {
             const string PASSWORD_OFFSET = @"../../../passwords/";
             _datasetFilenames = new PasswordDatasetInfo[]
             {
-                //new PasswordDataset(){ Filename = "faithwriters-withcount.txt", Name = "faithwriters" },
-                //new PasswordDataset(){ Filename = "myspace-filtered-withcount.txt", Name = "myspace" },
-                //new PasswordDataset(){ Filename = "phpbb-withcount.txt", Name = "phpbb" },
-                //new PasswordDataset(){ Filename = "rockyou-withcount.txt", Name = "rockyou" },
-                //new PasswordDataset(){ Filename = "singles.org-withcount.txt", Name = "singles.org" },
-                new PasswordDatasetInfo() { Filename = "morphed_english.txt", Name = "training" },
-                new PasswordDatasetInfo() { Filename = "forced_morphed_english.txt", Name = "testing" }
+				new PasswordDatasetInfo(){ Filename = "faithwriters-withcount.txt", Name = "faithwriters" },
+				new PasswordDatasetInfo(){ Filename = "myspace-filtered-withcount.txt", Name = "myspace" },
+				new PasswordDatasetInfo(){ Filename = "phpbb-withcount.txt", Name = "phpbb" },
+				new PasswordDatasetInfo(){ Filename = "rockyou-withcount.txt", Name = "rockyou" },
+				new PasswordDatasetInfo(){ Filename = "singles.org-withcount.txt", Name = "singles.org" },
+//                new PasswordDatasetInfo() { Filename = "morphed_english.txt", Name = "training" },
+//                new PasswordDatasetInfo() { Filename = "forced_morphed_english.txt", Name = "testing" }
             };
 
             Console.WriteLine("Loading all {0} password datasets...", _datasetFilenames.Length);
@@ -341,7 +351,7 @@ namespace PasswordEvolution
             _experiment.Passwords = _passwords[0];
             _experiment.Initialize("PasswordEvolution", xmlConfig.DocumentElement);
 
-            using (TextWriter writer = new StreamWriter(@"../../../experiments/summary_results.csv"))
+            using (TextWriter writer = new StreamWriter(results_file))
                 writer.WriteLine("TrainingSet,TestingSet,Accounts Cracked,Passwords Cracked,% Accounts,% Passwords");
         }
 
