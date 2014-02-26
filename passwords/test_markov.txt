@@ -1,4 +1,0 @@
-pa
-pat
-cat
-password
