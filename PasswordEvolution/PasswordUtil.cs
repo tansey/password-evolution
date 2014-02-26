@@ -11,9 +11,9 @@ namespace PasswordEvolution
     /// </summary>
     public static class PasswordUtil
     {
-        public static Dictionary<string, double> LoadPasswords(string pwdfile, double? length = null)
+        public static Dictionary<string, PasswordInfo> LoadPasswords(string pwdfile, int? length = null)
         {
-            var passwords = new Dictionary<string, double>();
+            var passwords = new Dictionary<string, PasswordInfo>();
             ulong best = 0;
             int[] countsHistogram = new int[20];
             using (TextReader reader = new StreamReader(pwdfile))
@@ -32,14 +32,14 @@ namespace PasswordEvolution
                     if (pw.Length == 0)
                         continue;
 
-                    int count = tokens.Length == 1 ? 1 : int.Parse(tokens[0]);
+                    double count = tokens.Length == 1 ? 1 : double.Parse(tokens[0]);
 
                     if (!length.HasValue || pw.Length == length.Value)
                     {
                         // Add it to the list
                         try
                         {
-                            passwords.Add(pw, count);
+                            passwords.Add(pw, new PasswordInfo((int)count, count));
                             best += (ulong)count;
                             if (count < countsHistogram.Length)
                                 countsHistogram[(int)(count - 1)]++;
@@ -75,7 +75,7 @@ namespace PasswordEvolution
         /// <summary>
         /// Prints summary statistics for a database of passwords.
         /// </summary>
-        public static void PrintStats(Dictionary<string, double> passwords)
+        public static void PrintStats(Dictionary<string, PasswordInfo> passwords)
         {
             int total = passwords.Count;
             int lowercase = 0;
@@ -129,7 +129,7 @@ namespace PasswordEvolution
                 }
             }
 
-            Console.WriteLine("Total Accounts: {0}", passwords.Sum(kp => kp.Value));
+            Console.WriteLine("Total Accounts: {0}", passwords.Sum(kp => kp.Value.Accounts));
             Console.WriteLine("Total Unique Passwords: {0}", total);
             Console.WriteLine("- Contain lowercase: {0} ({1:N2}%)", lowercase, lowercase / (double)total * 100);
             Console.WriteLine("- Contain uppercase: {0} ({1:N2}%)", uppercase, uppercase / (double)total * 100);

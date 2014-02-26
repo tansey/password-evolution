@@ -32,13 +32,13 @@ namespace PasswordEvolution
         ParallelOptions _parallelOptions;
         string[] _states;
         int _guesses;
-        Dictionary<string, double> _passwords;
+        Dictionary<string, PasswordInfo> _passwords;
         IActivationFunctionLibrary _activationFnLibrary;
         PasswordCrackingEvaluator _evaluator;
         int _outputs;
 
         #region Properties
-        public Dictionary<string, double> Passwords
+        public Dictionary<string, PasswordInfo> Passwords
         {
             get { return _passwords; }
             set { _passwords = value; }
@@ -131,19 +131,22 @@ namespace PasswordEvolution
             ValidationGuesses = XmlUtils.GetValueAsInt(xmlConfig, "ValidationGuesses");
 
             // Load the passwords from file
-       //     Console.Write("Loading passwords...");
-            string pwdfile = XmlUtils.GetValueAsString(xmlConfig, "ValidationPasswordFile");
-            Console.Write("Loading passwords from [{0}]...", pwdfile);
-            if (_passwords == null || _passwords.Count == 0)
+            string pwdfile = XmlUtils.TryGetValueAsString(xmlConfig, "ValidationPasswordFile");
+            if (pwdfile != null)
             {
-                int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
-                if (pwLength.HasValue)
-                    Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
-                _passwords = PasswordUtil.LoadPasswords(pwdfile, pwLength);
+                Console.Write("Loading passwords from [{0}]...", pwdfile);
+                if (_passwords == null || _passwords.Count == 0)
+                {
+                    int? pwLength = XmlUtils.TryGetValueAsInt(xmlConfig, "PasswordLength");
+                    if (pwLength.HasValue)
+                        Console.Write("Filtering to {0}-character passwords...", pwLength.Value);
+                    _passwords = PasswordUtil.LoadPasswords(pwdfile, pwLength);
+                }
+                else
+                    Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
             }
             else
-                Console.WriteLine("WARNING: Not loading passwords for experiment (already set)");
-
+                Console.WriteLine("WARNING: Not loading passwords for experiment (not provided in config file)");
             _eaParams = new NeatEvolutionAlgorithmParameters();
             _eaParams.SpecieCount = _specieCount;
             _neatGenomeParams = new NeatGenomeParameters();
@@ -205,12 +208,12 @@ namespace PasswordEvolution
         /// of the algorithm are also constructed and connected up.
         /// Uses the experiments default population size defined in the experiment's config XML.
         /// </summary>
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeListEvaluator<NeatGenome> eval = null)
         {
-            return CreateEvolutionAlgorithm(_populationSize);
+            return CreateEvolutionAlgorithm(_populationSize, eval);
         }
 
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(List<NeatGenome> seeds)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(List<NeatGenome> seeds, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -221,7 +224,7 @@ namespace PasswordEvolution
             return CreateEvolutionAlgorithm(genomeFactory, genomeList);
         }
 
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(NeatGenome seed, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -229,8 +232,9 @@ namespace PasswordEvolution
             // Create an initial population of randomly generated genomes.
             List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(_populationSize, 0, seed);
 
-            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, eval);
         }
+
 
         /// <summary>
         /// Create and return a NeatEvolutionAlgorithm object ready for running the NEAT algorithm/search. Various sub-parts
@@ -238,7 +242,7 @@ namespace PasswordEvolution
         /// This overload accepts a population size parameter that specifies how many genomes to create in an initial randomly
         /// generated population.
         /// </summary>
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create a genome factory with our neat genome parameters object and the appropriate number of input and output neuron genes.
             IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -247,10 +251,10 @@ namespace PasswordEvolution
             List<NeatGenome> genomeList = genomeFactory.CreateGenomeList(populationSize, 0);
 
             // Create evolution algorithm.
-            return CreateEvolutionAlgorithm(genomeFactory, genomeList);
+            return CreateEvolutionAlgorithm(genomeFactory, genomeList, eval);
         }
 
-        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList)
+        public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList, IGenomeListEvaluator<NeatGenome> eval = null)
         {
             // Create distance metric. Mismatched genes have a fixed distance of 10; for matched genes the distance is their weigth difference.
             IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
@@ -264,28 +268,42 @@ namespace PasswordEvolution
 
             // Create the MC evaluator
             PasswordCrackingEvaluator.Passwords = _passwords;
-            _evaluator = new PasswordCrackingEvaluator(_guesses, Hashed);
 
             // Create genome decoder.
             IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder = CreateGenomeDecoder();
 
-            // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
-        //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
-            IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator);
+            // If we're running specially on Condor, skip this
+            if (eval == null)
+            {
+                _evaluator = new PasswordCrackingEvaluator(_guesses, Hashed);
+
+                // Create a genome list evaluator. This packages up the genome decoder with the genome evaluator.
+                //    IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, _parallelOptions);
+                IGenomeListEvaluator<NeatGenome> innerEvaluator = new ParallelNEATGenomeListEvaluator<NeatGenome, MarkovChain>(genomeDecoder, _evaluator, this);
+
+                /*
+                // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes
+                // that were in the population in previous generations (elite genomes). This is determiend by examining each genome's evaluation info object.
+                IGenomeListEvaluator<NeatGenome> selectiveEvaluator = new SelectiveGenomeListEvaluator<NeatGenome>(
+                                                                                        innerEvaluator,
+                                                                                        SelectiveGenomeListEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
+                */
 
 
-            // Wrap the list evaluator in a 'selective' evaulator that will only evaluate new genomes. That is, we skip re-evaluating any genomes
-            // that were in the population in previous generations (elite genomes). This is determiend by examining each genome's evaluation info object.
-            IGenomeListEvaluator<NeatGenome> selectiveEvaluator = new SelectiveGenomeListEvaluator<NeatGenome>(
-                                                                                    innerEvaluator,
-                                                                                    SelectiveGenomeListEvaluator<NeatGenome>.CreatePredicate_OnceOnly());
-            // Initialize the evolution algorithm.
-            ea.Initialize(selectiveEvaluator, genomeFactory, genomeList);
+                // Initialize the evolution algorithm.
+                ea.Initialize(innerEvaluator, genomeFactory, genomeList);
+            }
+            else
+                // Initialize the evolution algorithm.
+                ea.Initialize(eval, genomeFactory, genomeList);
+
+            
 
             // Finished. Return the evolution algorithm
             return ea;
         }
 
+        
         /* UNCOMMENT THIS TO ENABLE GUI
         /// <summary>
         /// Create a System.Windows.Forms derived object for displaying genomes.

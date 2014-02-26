@@ -16,10 +16,7 @@ namespace PasswordEvolution
     /// </summary>
     public class PasswordCrackingEvaluator : IPhenomeEvaluator<MarkovChain>
     {
-        public static Dictionary<string, double> Passwords;
-        //
-        public static Dictionary<string, double> PasswordsWithAccounts;
-        //
+        public static Dictionary<string, PasswordInfo> Passwords;
         MD5HashChecker _md5;
         int _guesses;
         ulong _evalCount;
@@ -29,6 +26,11 @@ namespace PasswordEvolution
         {
             _guesses = guessesPerIndividual;
             FoundPasswords = new HashSet<string>();
+
+            // Begin Janek added
+            FoundValidationPasswords = new HashSet<string>();
+            // End Janek added
+
             if (hashed)
                 _md5 = new MD5HashChecker(Passwords);
         }
@@ -49,6 +51,8 @@ namespace PasswordEvolution
         }
 
         public HashSet<string> FoundPasswords { get; set; }
+
+        public HashSet<string> FoundValidationPasswords { get; set; }
 
         /// <summary>
         /// The fitness function for a candidate Markov model. It uses the number of accounts
@@ -83,15 +87,18 @@ namespace PasswordEvolution
                 if (guessed.Contains(guess))
                     continue;
 
-                double count;
+                double count=0;
+                PasswordInfo temp;
                 // If the database is hashed, then we need to hash the guess.
                 if (_md5 != null)
                     lock (_md5)
                         count = _md5.InDatabase(guess);
                 // If it's plaintext, we can simply look it up in the dictionary.
                 else
-                    Passwords.TryGetValue(guess, out count);
-
+                {
+                    if(Passwords.TryGetValue(guess, out temp))
+                        count = temp.Reward;
+                }
                 // If the password was in the dictionary, then this model guessed
                 // it correctly.
                 if (count > 0)
@@ -141,20 +148,20 @@ namespace PasswordEvolution
                 if (found.Contains(guess))
                     continue;
 
-                double count;
+                double count=0;
+                PasswordInfo temp;
                 if (_md5 != null)
                     count = _md5.InDatabase(guess);
                 else
-                    //Passwords.TryGetValue(guess, out count);
-                    PasswordsWithAccounts.TryGetValue(guess, out count);
+                {
+                    if(Passwords.TryGetValue(guess, out temp))
+                        count = temp.Accounts;
+                }
 
                 if (count > 0)
                 {
                     score += count;
                     uniques++;
-                    //
-                    //Console.WriteLine("Password found: {0}", guess);
-                    //
                     found.Add(guess);
                 }
             }
@@ -172,11 +179,11 @@ namespace PasswordEvolution
         /// <param name="interval">The frequency with which to write progress to file.</param>
         /// <param name="passwordLength">The length of passwords to try cracking.</param>
         /// <returns></returns>
-        public FitnessInfo Validate(MarkovChain model, Dictionary<string, double> db, string logfile, int interval, int passwordLength = 8)
+        public FitnessInfo Validate(MarkovChain model, Dictionary<string, PasswordInfo> db, string logfile, int interval, int passwordLength = 8)
         {
             double score = 0;
             int uniques = 0;
-            double totalAccounts = db.Where(kv => kv.Key.Length == passwordLength).Sum(kv => kv.Value);
+            double totalAccounts = db.Where(kv => kv.Key.Length == passwordLength).Sum(kv => kv.Value.Accounts);
             double totalUniques = db.Where(kv => kv.Key.Length == passwordLength).Count();
 
             using (StreamWriter writer = new StreamWriter(logfile))
@@ -194,11 +201,14 @@ namespace PasswordEvolution
                         continue;
 
                     double count;
+                    PasswordInfo temp;
                     if (_md5 != null)
                         count = _md5.InDatabase(guess);
                     else
-                        db.TryGetValue(guess, out count);
-
+                    {
+                        db.TryGetValue(guess, out temp);
+                        count = temp.Reward;
+                    }
                     if (count > 0)
                     {
                         score += count;
@@ -210,6 +220,56 @@ namespace PasswordEvolution
             }
 
             return new FitnessInfo(score, uniques);
+        }
+
+        public bool ValidatePopulation(List<MarkovChain> models)
+        {
+            foreach (MarkovChain m in models)
+                ValidatePopHelper(m);
+            return true;
+        }
+
+        /// <summary>
+        /// Validate a model against a large number of guesses.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public bool ValidatePopHelper(MarkovChain model)
+        {
+          //  double score = 0;
+          //  int uniques = 0;
+
+            HashSet<string> found = new HashSet<string>();
+            for (int i = 0; i < _guesses; i++)
+            {
+                if (i > 0 && i % 100000000 == 0)
+                    Console.WriteLine(i);
+
+                var guess = model.Activate();
+
+                if (found.Contains(guess))
+                    continue;
+
+                double count = 0;
+                PasswordInfo temp;
+                if (_md5 != null)
+                    count = _md5.InDatabase(guess);
+                else
+                {
+                    if (Passwords.TryGetValue(guess, out temp))
+                        count = temp.Accounts;
+                }
+
+                if (count > 0)
+                {
+                  //  score += count;
+                  //  uniques++;
+                    lock (FoundValidationPasswords)
+                        FoundValidationPasswords.Add(guess);
+                }
+            }
+
+            return true;
         }
     }
 }

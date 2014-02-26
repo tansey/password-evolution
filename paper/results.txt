@@ -388,25 +388,26 @@ Show that a first-order (2-layer) Markov chain is not great
 Experiment 1
 Trained-Tested, Best Gen 0, Total Gen 0 -> Gen 2
 
-8-layers, squeezed (all passwords)
-phpbb-phpbb, 1719, Gen 0: 781 -> Gen 2: 1509
-phpbb-rockyou, 86862, Gen 0: 24860 -> 54531
-rockyou-rockyou, 77673, Gen 0: 46334 -> 89918
-
-8-layers, truncated (8-character only)
-phpbb-phpbb, 1836, Gen 0: 919 -> Gen 2: 1555
-phpbb-rockyou, 96864, Gen 0: 25368 -> Gen 2: 47862
-rockyou-rockyou, 181735, Gen 0: 72864 -> Gen 2: 136644
 
 2-layers, squeezed (all passwords)
 phpbb-phpbb, 423, Gen 0: 392 -> Gen 2: 847
 phpbb-rockyou, 24456, Gen 0: 14437 -> Gen 2: 33560
 rockyou-rockyou, 31813, Gen 0: 25983 -> Gen 2: 56634
 
+8-layers, squeezed (all passwords)
+phpbb-phpbb, 1719, Gen 0: 781 -> Gen 2: 1509
+phpbb-rockyou, 86862, Gen 0: 24860 -> 54531
+rockyou-rockyou, 77673, Gen 0: 46334 -> 89918
+
 2-layers, truncated (8-character only)
 phpbb-phpbb, 302, Gen 0: 378 -> Gen 2: 607
 phpbb-rockyou, 20943, Gen 0: 10486 -> Gen 2: 21341
 rockyou-rockyou, 22979, Gen 0: 27460 -> Gen 2: 63165
+
+8-layers, truncated (8-character only)
+phpbb-phpbb, 1836, Gen 0: 919 -> Gen 2: 1555
+phpbb-rockyou, 96864, Gen 0: 25368 -> Gen 2: 47862
+rockyou-rockyou, 181735, Gen 0: 72864 -> Gen 2: 136644
 
 Adaptive, exactly 8-characters
 phpbb-phpbb, 1796, Gen 0: 900  Gen 2: 1532

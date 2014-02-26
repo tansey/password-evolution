@@ -18,7 +18,7 @@ namespace PasswordEvolution
         /// </summary>
         private static void ProcessHackForumsFile()
         {
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\hackforums.sql"))
+            using (TextReader reader = new StreamReader(@"../../../passwords/hackforums.sql"))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
@@ -26,7 +26,7 @@ namespace PasswordEvolution
                     if (line.StartsWith("INSERT INTO"))
                         break;
                 }
-                using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\hackforums.txt"))
+                using (TextWriter writer = new StreamWriter(@"../../../passwords/hackforums.txt"))
                     while ((line = reader.ReadLine()) != null)
                     {
                         if (line == "")
@@ -61,8 +61,8 @@ namespace PasswordEvolution
         /// </summary>
         private static void ProcessBattlefieldHeroesFile()
         {
-            Dictionary<string, double> passwords = new Dictionary<string, double>();
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\battlefield_heroes.csv"))
+            Dictionary<string, PasswordInfo> passwords = new Dictionary<string, PasswordInfo>();
+            using (TextReader reader = new StreamReader(@"../../../passwords/battlefield_heroes.csv"))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
@@ -72,14 +72,15 @@ namespace PasswordEvolution
 
                     var tokens = line.Split(';');
                     string pw = tokens.Last().Trim('"');
-                    double val;
+                    PasswordInfo val;
                     if (!passwords.TryGetValue(pw, out val))
-                        passwords.Add(pw, 0);
+                        passwords.Add(pw, new PasswordInfo(0,0));
 
-                    passwords[pw]++;
+                    passwords[pw].Accounts++;
+                    passwords[pw].Reward++;
                 }
             }
-            using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\battlefield_heroes.txt"))
+            using (TextWriter writer = new StreamWriter(@"../../../passwords/battlefield_heroes.txt"))
                 foreach (var kv in passwords.OrderByDescending(s => s.Value))
                     writer.WriteLine(kv.Value + " " + kv.Key);
         }
@@ -93,9 +94,9 @@ namespace PasswordEvolution
         /// </summary>
         private static void ProcessMySpaceFile()
         {
-            using (TextReader reader = new StreamReader(@"..\..\..\passwords\myspace-unfiltered-withcount.txt"))
+            using (TextReader reader = new StreamReader(@"../../../passwords/myspace-unfiltered-withcount.txt"))
             {
-                using (TextWriter writer = new StreamWriter(@"..\..\..\passwords\myspace-filtered-withcount.txt"))
+                using (TextWriter writer = new StreamWriter(@"../../../passwords/myspace-filtered-withcount.txt"))
                 {
                     string line = null;
                     while ((line = reader.ReadLine()) != null)

@@ -3,6 +3,14 @@ using SharpNeat.Core;
 using SharpNeat.Genomes.Neat;
 using SharpNeatMarkovModels;
 using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using SharpNeat.Core;
+using SharpNeat.Genomes.Neat;
+using SharpNeatMarkovModels;
+using System.Threading.Tasks;
+using System.IO;
+
 namespace PasswordEvolution
 {
     /// <summary>
@@ -18,7 +26,7 @@ namespace PasswordEvolution
     {
         readonly IGenomeDecoder<NeatGenome, MarkovChain> _genomeDecoder;
         readonly PasswordCrackingEvaluator _passwordCrackingEvaluator;
-
+        PasswordEvolutionExperiment experiment;
         delegate void EvaluationMethod(IList<NeatGenome> genomeList);
 
         #region Constructors
@@ -29,9 +37,10 @@ namespace PasswordEvolution
         /// The number of parallel threads defaults to Environment.ProcessorCount.
         /// </summary>
         public ParallelNEATGenomeListEvaluator(IGenomeDecoder<NeatGenome, MarkovChain> genomeDecoder,
-                                           PasswordCrackingEvaluator passwordCrackingEvaluator)
+                                           PasswordCrackingEvaluator passwordCrackingEvaluator, PasswordEvolutionExperiment experiment)
             : this(genomeDecoder, passwordCrackingEvaluator, true)
         {
+            this.experiment = experiment;
         }
 
     
@@ -77,12 +86,19 @@ namespace PasswordEvolution
             _passwordCrackingEvaluator.Reset();
         }
 
+        public void Evaluate(IList<TGenome> genomeList)
+        {
+            //EvaluateNeat((IList<NeatGenome>)genomeList);
+            EvaluateCondor((IList<NeatGenome>)genomeList);
+        }
+
         /// <summary>
         /// Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
         /// and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
         /// </summary>
-        public void Evaluate(IList<NeatGenome> genomeList)
+        public void EvaluateNeat(IList<NeatGenome> genomeList)
         {
+            //Console.WriteLine("Number of genomes right before EvaluateNeat: " + genomeList.Count);
             Parallel.ForEach(genomeList, delegate(NeatGenome genome)
             {
                 MarkovChain phenome = _genomeDecoder.Decode(genome);
@@ -109,8 +125,76 @@ namespace PasswordEvolution
             foreach (string p in _passwordCrackingEvaluator.FoundPasswords)
             {
                 //PasswordCrackingEvaluator.Passwords.Remove(p);
-                double val = PasswordCrackingEvaluator.Passwords[p];
-                PasswordCrackingEvaluator.Passwords[p] = val * 0.75;
+                double val = PasswordCrackingEvaluator.Passwords[p].Reward;
+                PasswordCrackingEvaluator.Passwords[p].Reward = val * 0.75;
+            }
+        }
+
+        /// <summary>
+        /// Evaluates a list of genomes. Here we decode each genome in using the contained IGenomeDecoder
+        /// and evaluate the resulting TPhenome using the contained IPhenomeEvaluator.
+        /// </summary>
+        public void EvaluateCondor(IList<NeatGenome> genomeList)
+        {
+            int totalNumberGenomes = genomeList.Count;
+            int numberGenomes = 0;
+            string[] finishedFiles = Directory.GetFiles(@"..\..\..\experiments\genomes\genome-finished\", "*.txt"); //finished files used as flags
+
+            // Delete existing finished files that are used as flags
+            foreach (string finishedFile in finishedFiles)
+            {
+                File.Delete(finishedFile);
+            }
+
+
+            // Write genome to file
+            Parallel.For(0, genomeList.Count, a =>
+            {
+                NeatGenome genome = genomeList[a];
+
+                var doc = NeatGenomeXmlIO.SaveComplete(new List<NeatGenome>() { genome }, true);
+                doc.Save(@"..\..\..\experiments\genomes\genome-" + a + ".xml");
+
+            });
+
+            GenomeEvaluator.Evaluate(_genomeDecoder, _passwordCrackingEvaluator, experiment);
+
+            /* launch condor */
+
+            do
+            {
+                string[] flags = Directory.GetFiles(@"..\..\..\experiments\genomes\genome-finished\", "*.txt");
+                numberGenomes = flags.Length;
+                //System.Threading.Thread.Sleep(1000); //??
+
+            } while (numberGenomes != totalNumberGenomes);
+
+
+            for (int a = 0; a < genomeList.Count; a++)
+            {
+                NeatGenome genome = genomeList[a];
+                try
+                {
+                    string name = "genome-" + a + "-finished.txt";
+                    StreamReader sr = new StreamReader(@"..\..\..\experiments\genomes\genome-results\genome-" + a + "-results.txt");
+                    string line = sr.ReadLine();
+                    string[] values = line.Split(' ');
+                    genome.EvaluationInfo.SetFitness(double.Parse(values[0]));
+                    genome.EvaluationInfo.AlternativeFitness = double.Parse(values[1]);
+                }
+                catch (System.Exception e)
+                {
+                    System.Console.WriteLine("File not found.");
+                }
+            }
+          
+
+
+            foreach (string p in _passwordCrackingEvaluator.FoundPasswords)
+            {
+                
+                double val = PasswordCrackingEvaluator.Passwords[p].Reward;
+                PasswordCrackingEvaluator.Passwords[p].Reward = val * 0.75;
             }
         }
 
