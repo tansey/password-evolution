@@ -2,7 +2,7 @@
 This is a version of the SharpNEAT (v2.1) framework that has been adapted to evolve Markov chains instead of neural networks. The goal of this project is to evolve Markov chains that can better model the distributions of user-created passwords in online databases.
 
 ## Acessing password data
-The password data was too large to store on Github, since some of the lists are hundreds of MB in size. You can find all the data for the passwords at (this dropbox folder)[https://www.dropbox.com/sh/pxr2yl4zzeldc0h/dE3AwqXPEi].
+The password data was too large to store on Github, since some of the lists are hundreds of MB in size. You can find all the data for the passwords at [this dropbox folder](https://www.dropbox.com/sh/pxr2yl4zzeldc0h/dE3AwqXPEi).
 
 ## Changes to SharpNEAT
 To accomodate Markov chains, I have made some changes to the underlying framework. It is my hope that keeping track of the core changes will help guide the next iteration of SharpNEAT to make it more modular and flexible regarding less traditional structures.
